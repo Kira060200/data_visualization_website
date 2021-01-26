@@ -7,18 +7,77 @@ fct_masa = function(){
 # 1 aruncam o moneda
 FctMasa = function(p){
   plot(c(1,0),c(p,1-p), lwd=5)
-  segments(c(1,0), 0, c(1,0), c(p,1-p))
+  segments(c(1,0), 0, c(1,0), c(p,1-p), col="red")
 }
 FctMasa(2/3)
 
 FctRep = function(p){
   #plot(c(-0.0002,1,0),c(0,p,1-p), lwd=5)
-  plot(c(1,0),c(p,1-p), lwd=5, xlim = c(-0.5,1.5))
-  segments(c(1,0), 0, c(1,0), c(p,1-p), lty="dashed")
-  segments(0, c(1-p,p), c(1,0), c(1-p,p), col = "red")
-  segments(-2, 0, 0, 0, col = "red")
-  segments(0, c(1-p,p), c(1,0), c(1-p,p), col = "red")
-  # segments(0, 0, 0, max(p,1-p))
+  plot(c(0,1),c(1-p,1), lwd=5, xlim = c(-0.5,1.5), ylim = c(0,1))
+  segments(c(0,1), 0, c(0,1), c(1-p,1), lty="dashed")
+  segments(c(-0.6,0,1), c(0, 1-p, 1), c(0, 1, 2), c(0, 1-p, 1), col = "red")
+  # segments(0, 1-p, 1, 1-p, col = "red")
+  # segments(1, 1, 2, 1, col = "red")
 }
 FctRep(2/3)
 
+F = function(x,p){
+  if (x<0){
+    y=0
+  }else if (x<1){
+    y = 1-p
+  }else{
+    y=1
+  }
+  return(y)
+}
+
+F = Vectorize(F, vectorize.args = "x")
+
+t = seq(-1,2,length.out = 1000)
+y = F(t,2/3)
+
+plot(t, y, type= "l", col="red")
+
+P = function(p, a, b=NULL, param=NULL)
+{
+  if(is.null(b))
+  {
+    if(is.null(param))
+    {
+      F(a, p)
+    }
+    else
+    {
+      1 - F(a, p)
+    }
+  }
+  else
+  {
+    F(b, p) - F(a, p)
+  }
+}
+P(2/3,0,1)
+# P = Vectorize(P(2/3,0,1), vectorize.args = "x")
+
+F = Vectorize(F, vectorize.args = "x")
+t = seq(-1,2,length.out = 1000)
+y = F(t,1/3)
+plot(t, y, type= "l", col="red")
+x = seq(0,1,length.out = 1000)
+y = F(x,1/3)
+polygon(c(0,x,1),c(0,y,0), col="red")
+
+# Define the Mean and Stdev
+mean=1152
+sd=84
+
+# Create x and y to be plotted
+# x is a sequence of numbers shifted to the mean with the width of sd.  
+# The sequence x includes enough values to show +/-3.5 standard deviations in the data set.
+# y is a normal distribution for x
+x <- seq(-3.5,3.5,length=100)*sd + mean
+y <- dnorm(x,mean,sd)
+
+plot(x, y, type="l")
+polygon(c(x[x>=1250], max(x), 1250), c(y[x>=1250], 0, 0), col="red")
