@@ -81,3 +81,13 @@ y <- dnorm(x,mean,sd)
 
 plot(x, y, type="l")
 polygon(c(x[x>=1250], max(x), 1250), c(y[x>=1250], 0, 0), col="red")
+    fd2 = function(x){
+        return (exp(x)/(1 + exp(x))^2)
+    }
+    F2 = function(x){
+        return (integrate(fd2,lower = -Inf, upper = x)$value)
+    }
+    F2 = Vectorize(F2, vectorize.args = "x")
+        x = seq(-10, 10, length.out = 10)
+        y = F2(x) 
+        plot(x, y, type= "l", col="red")
