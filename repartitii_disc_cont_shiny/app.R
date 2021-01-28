@@ -17,57 +17,70 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
     
     selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
     sliderInput("a",
-        "a:",
-        step = 1,
-        min = 0,
-        max = 1,
-        value = 0),
+                "a:",
+                step = 1,
+                min = 0,
+                max = 1,
+                value = 0),
     sliderInput("b",
-        "b:",
-        step = 1,
-        min = 0,
-        max = 1,
-        value = 1)
-    ),
-    mainPanel(tabsetPanel(id = "tabs",
-               tabPanel("1",
-                        sliderInput("prob",
-                                    "Probability:",
-                                    min = 0.1,
-                                    max = 1,
-                                    value = 0.33)
-               ),
-               tabPanel("2"),
-               tabPanel("3",
-                        sliderInput("lmb3",
-                                    "Lambda:",
-                                    min = 0.1,
-                                    max = 1,
-                                    value = 1)
-               ),
-               tabPanel("4",
-                        sliderInput("prob",
-                                    "Probability:",
-                                    min = 0.1,
-                                    max = 1,
-                                    value = 0.33),
-                        numericInput("NrAruncari",
-                                     "Numar aruncari",
-                                     min = 1,
-                                     max = 1000,
-                                     value = 300)
-               )
-        ),
-        plotOutput("fctMasa"),
-        plotOutput("fctRep"),
-        plotOutput("fctProb"),
-        textOutput("valueProb")
-    )
+                "b:",
+                step = 1,
+                min = 0,
+                max = 1,
+                value = 1)
+),
+mainPanel(tabsetPanel(id = "tabs",
+                      tabPanel("1",
+                               sliderInput("prob",
+                                           "Probability:",
+                                           min = 0.1,
+                                           max = 1,
+                                           value = 0.33)
+                      ),
+                      tabPanel("2"),
+                      tabPanel("3",
+                               sliderInput("lmb3",
+                                           "Lambda:",
+                                           min = 0.1,
+                                           max = 1,
+                                           value = 1)
+                      ),
+                      tabPanel("4",
+                               sliderInput("prob",
+                                           "Probability:",
+                                           min = 0.1,
+                                           max = 1,
+                                           value = 0.33),
+                               numericInput("NrAruncari",
+                                            "Numar aruncari",
+                                            min = 1,
+                                            max = 1000,
+                                            value = 300)
+                      ),
+                     tabPanel("5",
+                              sliderInput("prob_infectare",
+                                          "Probability:",
+                                          min = 0.001,
+                                          max = 1,
+                                          value = 0.001),
+                              numericInput("NrInfectati",
+                                           "Numar infectati",
+                                           min = 10,
+                                           max = 5000,
+                                           value = 1000)
+                               )
+                      
+),
+plotOutput("fctMasa"),
+plotOutput("fctRep"),
+plotOutput("fctProb"),
+textOutput("valueProb")
 )
-    
-    #navbarPage("Navbar!",
-    #),
-    
+)
+
+#navbarPage("Navbar!",
+#),
+
 )
 
 # Define server logic required to draw a histogram
@@ -385,22 +398,97 @@ server <- function(input, output, session) {
             observeEvent(input$b,  {
                 updateSliderInput(session = session, "a", max = input$b)
             })
+        }else if(input$tabs==5)
+        {
+            
+            # Suppose the probability that a drug produces a certain side effect is p = = 0.1% and n = 1,000 patients in a clinical trial receive the drug.
+            # What is the probability 0 people experience the side effect?
+            
+            observeEvent(input$NrInfectati,
+                         {
+                             updateSliderInput(session = session, "a", max = 10)
+                             updateSliderInput(session = session, "b", max = 10)
+                         })
+            
+            fd5 = function(x)
+            {
+                return(dpois(x = x, lambda = input$NrInfectati * input$prob_infectare))
+            }
+            
+            F5 = function(xx)
+            {
+                return (ppois(q = xx, lambda = input$NrInfectati * input$prob_infectare, lower.tail = TRUE))
+            }
+            
+            output$fctMasa <- renderPlot({
+                x <- 0:10
+                density <- dpois(x = x, lambda = input$NrInfectati * input$prob_infectare)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x <- 0:10
+                prob <- ppois(q = x, lambda = input$NrInfectati * input$prob_infectare, lower.tail = TRUE)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            output$fctProb <- renderPlot({
+                x = 0:10
+                y = ppois(q = x, lambda = input$prob_infectare * input$NrInfectati, lower.tail = TRUE)
+                
+                plot(x, y, type= "l", col="red")
+                
+                if(input$SelectProb=="P(x<=a)"){
+                    polygon(c(input$a,x[x<=input$a]), c(0,y[x<=input$a]), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    polygon(c(input$b,x[input$b<=x],input$NrInfectati),c(0,y[input$b<=x],0), col="light blue")
+                }else{
+                    x = seq(input$a,input$b)
+                    y = F5(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                    
+                }
+            })
+            P5 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F5(a))
+                    }
+                    else
+                    {
+                        return (1 - F5 (a))
+                    }
+                }
+                else
+                {
+                    return (F5(b) - F5(a))
+                }
+            }
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P5(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P5(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P5(input$a, input$b))
+                    })
+                }
+            })
+
+        
+
+            
+            
         }
-        # when water change, update air
-        #observeEvent(input$a,  {
-        #    updateSliderInput(session = session, "b", min = input$a)
-        #})
-        #
-        ## when air change, update water
-        #observeEvent(input$b,  {
-        #    updateSliderInput(session = session, "a", max = input$b)
-        #})
         
-        
-        
-        # output$valueProb <- renderText({
-        #     c("Probability: ", P(input$prob, input$a, input$b))
-        # })
     })    
 }
 
