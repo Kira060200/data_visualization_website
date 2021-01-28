@@ -8,55 +8,81 @@
 #
 
 library(shiny)
-library(ggplot2)
+library(markdown)
+
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Repartitii discrete si continue"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
-            sliderInput("xmasa",
-                        "X:",
-                        step = 1,
-                        min = 0,
-                        max = 1,
-                        value = 1),
-            sliderInput("a",
-                        "a:",
-                        step = 1,
-                        min = 0,
-                        max = 1,
-                        value = 0),
-            sliderInput("b",
-                        "b:",
-                        step = 1,
-                        min = 0,
-                        max = 1,
-                        value = 1),
-            sliderInput("prob",
-                        "Probability:",
-                        min = 0.1,
-                        max = 1,
-                        value = 0.33)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("fctMasa"),
-            plotOutput("fctRep"),
-            plotOutput("fctProb"),
-            textOutput("valueProb"),
-            plotOutput("fctDens2"),
-            plotOutput("fctRep2"),
-            plotOutput("fctProb2"),
-            textOutput("valueProb2")
-        )
+    
+    navbarPage("Navbar!",
+               tabPanel("1",
+                        selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
+                        sliderInput("xmasa",
+                                    "X:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 1,
+                                    value = 1),
+                        sliderInput("a",
+                                    "a:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 1,
+                                    value = 0),
+                        sliderInput("b",
+                                    "b:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 1,
+                                    value = 1),
+                        sliderInput("prob",
+                                    "Probability:",
+                                    min = 0.1,
+                                    max = 1,
+                                    value = 0.33),
+                        mainPanel(
+                            plotOutput("fctMasa"),
+                            plotOutput("fctRep"),
+                            plotOutput("fctProb"),
+                            textOutput("valueProb")
+                         
+                        )
+               ),
+               tabPanel("2",
+                        selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
+                        sliderInput("xmasa",
+                                    "X:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 1,
+                                    value = 1),
+                        sliderInput("a",
+                                    "a:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 1,
+                                    value = 0),
+                        sliderInput("b",
+                                    "b:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 1,
+                                    value = 1),
+                        sliderInput("prob",
+                                    "Probability:",
+                                    min = 0.1,
+                                    max = 1,
+                                    value = 0.33),
+                        mainPanel(
+                            plotOutput("fctDens2"),
+                            plotOutput("fctRep2"),
+                            plotOutput("fctProb2"),
+                            textOutput("valueProb2")
+                        )
+               )
     )
+    
 )
 
 # Define server logic required to draw a histogram
