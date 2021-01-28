@@ -10,25 +10,14 @@
 library(shiny)
 library(markdown)
 
-<<<<<<< Updated upstream
 
 
-=======
-
-
->>>>>>> Stashed changes
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     
     navbarPage("Navbar!",
                tabPanel("1",
                         selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
-                        sliderInput("xmasa",
-                                    "X:",
-                                    step = 1,
-                                    min = 0,
-                                    max = 1,
-                                    value = 1),
                         sliderInput("a",
                                     "a:",
                                     step = 1,
@@ -51,55 +40,23 @@ ui <- fluidPage(
                             plotOutput("fctRep"),
                             plotOutput("fctProb"),
                             textOutput("valueProb")
-<<<<<<< Updated upstream
-                         
-                        )
-               ),
-               tabPanel("2",
-                        selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
-                        sliderInput("xmasa",
-=======
                             
                         )
                ),
                tabPanel("2",
                         selectInput("SelectProb2", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
-                        sliderInput("xmasa2",
->>>>>>> Stashed changes
-                                    "X:",
-                                    step = 1,
-                                    min = 0,
-                                    max = 1,
-                                    value = 1),
-<<<<<<< Updated upstream
-                        sliderInput("a",
-=======
                         sliderInput("a2",
->>>>>>> Stashed changes
                                     "a:",
                                     step = 1,
                                     min = 0,
                                     max = 1,
                                     value = 0),
-<<<<<<< Updated upstream
-                        sliderInput("b",
-=======
                         sliderInput("b2",
->>>>>>> Stashed changes
                                     "b:",
                                     step = 1,
                                     min = 0,
                                     max = 1,
                                     value = 1),
-<<<<<<< Updated upstream
-                        sliderInput("prob",
-=======
-                        sliderInput("prob2",
->>>>>>> Stashed changes
-                                    "Probability:",
-                                    min = 0.1,
-                                    max = 1,
-                                    value = 0.33),
                         mainPanel(
                             plotOutput("fctDens2"),
                             plotOutput("fctRep2"),
@@ -177,7 +134,6 @@ server <- function(input, output, session) {
     })
     
     
-    
     observeEvent(input$SelectProb, {
         if(input$SelectProb=="P(x<=a)"){
             output$valueProb <- renderText({
@@ -228,11 +184,9 @@ server <- function(input, output, session) {
         
     })
     
+    # 2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     # V.a. continua
-    
-    
-    
-    
     fd2 = function(x){
         return (exp(x)/(1 + exp(x))^2)
     }
@@ -250,7 +204,6 @@ server <- function(input, output, session) {
         y = F2(x) 
         plot(x, y, type= "l", col="red")
     })
-    
     output$fctProb2 <- renderPlot({
         x = seq(-10, 10, length.out = 1000)
         y = F2(x) 
@@ -268,15 +221,6 @@ server <- function(input, output, session) {
             y = F2(x)
             polygon(c(input$a2,x,input$b2), c(0,y,0), col="light blue")
         }
-    })
-    
-    observeEvent(input$a2,  {
-        updateSliderInput(session = session, "b2", min = input$a2)
-    })
-    
-    # when air change, update water
-    observeEvent(input$b2,  {
-        updateSliderInput(session = session, "a2", max = input$b2)
     })
     P2 = function(a, b=NULL, param=NULL)
     {
@@ -296,6 +240,16 @@ server <- function(input, output, session) {
             return (F2(b) - F2(a))
         }
     }
+    
+    observeEvent(input$a2,  {
+        updateSliderInput(session = session, "b2", min = input$a2)
+    })
+    
+    # when air change, update water
+    observeEvent(input$b2,  {
+        updateSliderInput(session = session, "a2", max = input$b2)
+    })
+    
     observeEvent(input$SelectProb2, {
         if(input$SelectProb2=="P(x<=a)"){
             output$valueProb2 <- renderText({
@@ -307,11 +261,7 @@ server <- function(input, output, session) {
             })
         }else{
             output$valueProb2 <- renderText({
-<<<<<<< Updated upstream
-                c("Probability: ", P2( input$a, input$b))
-=======
                 c("Probability: ", P2( input$a2, input$b2))
->>>>>>> Stashed changes
             })
         }
     })
