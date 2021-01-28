@@ -10,8 +10,13 @@
 library(shiny)
 library(markdown)
 
+<<<<<<< Updated upstream
 
 
+=======
+
+
+>>>>>>> Stashed changes
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     
@@ -46,30 +51,51 @@ ui <- fluidPage(
                             plotOutput("fctRep"),
                             plotOutput("fctProb"),
                             textOutput("valueProb")
+<<<<<<< Updated upstream
                          
                         )
                ),
                tabPanel("2",
                         selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
                         sliderInput("xmasa",
+=======
+                            
+                        )
+               ),
+               tabPanel("2",
+                        selectInput("SelectProb2", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
+                        sliderInput("xmasa2",
+>>>>>>> Stashed changes
                                     "X:",
                                     step = 1,
                                     min = 0,
                                     max = 1,
                                     value = 1),
+<<<<<<< Updated upstream
                         sliderInput("a",
+=======
+                        sliderInput("a2",
+>>>>>>> Stashed changes
                                     "a:",
                                     step = 1,
                                     min = 0,
                                     max = 1,
                                     value = 0),
+<<<<<<< Updated upstream
                         sliderInput("b",
+=======
+                        sliderInput("b2",
+>>>>>>> Stashed changes
                                     "b:",
                                     step = 1,
                                     min = 0,
                                     max = 1,
                                     value = 1),
+<<<<<<< Updated upstream
                         sliderInput("prob",
+=======
+                        sliderInput("prob2",
+>>>>>>> Stashed changes
                                     "Probability:",
                                     min = 0.1,
                                     max = 1,
@@ -92,8 +118,8 @@ server <- function(input, output, session) {
         segments(c(1,0), 0, c(1,0), c(p,1-p), col="red")
     }
     
-# Pp ca avem un experiment aleator. ne interesam la realizarea unui eveniment A. Csd ca sansa de realizare a lui A este p
-# 1 aruncam o moneda
+    # Pp ca avem un experiment aleator. ne interesam la realizarea unui eveniment A. Csd ca sansa de realizare a lui A este p
+    # 1 aruncam o moneda
     F = function(x,p){
         if (x<0){
             y=0
@@ -131,7 +157,7 @@ server <- function(input, output, session) {
         # generate bins based on input$bins from ui.R
         # x    <- faithful[, 2]
         # bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
+        
         # draw the histogram with the specified number of bins
         # hist(x, breaks = bins, col = 'darkgray', border = 'white')
         F = Vectorize(F, vectorize.args = "x")
@@ -149,6 +175,7 @@ server <- function(input, output, session) {
     observeEvent(input$b,  {
         updateSliderInput(session = session, "a", max = input$b)
     })
+    
     
     
     observeEvent(input$SelectProb, {
@@ -198,10 +225,14 @@ server <- function(input, output, session) {
             y = F(x,input$prob)
             polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
         }
-
+        
     })
     
     # V.a. continua
+    
+    
+    
+    
     fd2 = function(x){
         return (exp(x)/(1 + exp(x))^2)
     }
@@ -219,23 +250,33 @@ server <- function(input, output, session) {
         y = F2(x) 
         plot(x, y, type= "l", col="red")
     })
+    
     output$fctProb2 <- renderPlot({
         x = seq(-10, 10, length.out = 1000)
         y = F2(x) 
         plot(x, y, type= "l", col="red")
-        if(input$SelectProb=="P(x<=a)"){
-            x = seq(-10,input$a,length.out = 1000)
+        if(input$SelectProb2=="P(x<=a)"){
+            x = seq(-10,input$a2,length.out = 1000)
             y = F2(x)
-            polygon(c(-10,x,input$a), c(-10,y,0), col="light blue")
-        }else if(input$SelectProb=="P(x>=b)"){
-            x = seq(input$b,10,length.out = 1000)
+            polygon(c(-10,x,input$a2), c(-10,y,0), col="light blue")
+        }else if(input$SelectProb2=="P(x>=b)"){
+            x = seq(input$b2,10,length.out = 1000)
             y = F2(x)
-            polygon(c(input$b,x,10), c(0,y,0), col="light blue")
+            polygon(c(input$b2,x,10), c(0,y,0), col="light blue")
         }else{
-            x = seq(input$a,input$b,length.out = 1000)
+            x = seq(input$a2,input$b2,length.out = 1000)
             y = F2(x)
-            polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+            polygon(c(input$a2,x,input$b2), c(0,y,0), col="light blue")
         }
+    })
+    
+    observeEvent(input$a2,  {
+        updateSliderInput(session = session, "b2", min = input$a2)
+    })
+    
+    # when air change, update water
+    observeEvent(input$b2,  {
+        updateSliderInput(session = session, "a2", max = input$b2)
     })
     P2 = function(a, b=NULL, param=NULL)
     {
@@ -255,18 +296,22 @@ server <- function(input, output, session) {
             return (F2(b) - F2(a))
         }
     }
-    observeEvent(input$SelectProb, {
-        if(input$SelectProb=="P(x<=a)"){
+    observeEvent(input$SelectProb2, {
+        if(input$SelectProb2=="P(x<=a)"){
             output$valueProb2 <- renderText({
-                c("Probability: ", P2(input$a))
+                c("Probability: ", P2(input$a2))
             })
-        }else if(input$SelectProb=="P(x>=b)"){
+        }else if(input$SelectProb2=="P(x>=b)"){
             output$valueProb2 <- renderText({
-                c("Probability: ", P2(input$b, param = 1))
+                c("Probability: ", P2(input$b2, param = 1))
             })
         }else{
             output$valueProb2 <- renderText({
+<<<<<<< Updated upstream
                 c("Probability: ", P2( input$a, input$b))
+=======
+                c("Probability: ", P2( input$a2, input$b2))
+>>>>>>> Stashed changes
             })
         }
     })
