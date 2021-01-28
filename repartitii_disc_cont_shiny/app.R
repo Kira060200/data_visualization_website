@@ -9,7 +9,8 @@
 
 library(shiny)
 library(markdown)
-
+library(ggplot2)
+library(dplyr)
 
 
 # Define UI for application that draws a histogram
@@ -63,7 +64,38 @@ ui <- fluidPage(
                             plotOutput("fctProb2"),
                             textOutput("valueProb2")
                         )
-               )
+               ),
+               tabPanel("4",
+                        selectInput("SelectProb4", "Select probability formula", choices= c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
+                        sliderInput("a4",
+                                    "a:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 300,
+                                    value = 0),
+                        sliderInput("b4",
+                                    "b:",
+                                    step = 1,
+                                    min = 0,
+                                    max = 300,
+                                    value = 300),
+                        sliderInput("prob4",
+                                    "Probability:",
+                                    min = 0.1,
+                                    max = 1,
+                                    value = 0.30),
+                        numericInput("nr4",
+                                     "Cate aruncari",
+                                     min = 1,
+                                     max = 1000,
+                                     value = 300),
+                        mainPanel(
+                            plotOutput("fctDens4"),
+                            plotOutput("fctRep4"),
+                            plotOutput("fctProb4"),
+                            textOutput("valueProb4")
+                        )
+            )
     )
     
 )
@@ -265,7 +297,69 @@ server <- function(input, output, session) {
             })
         }
     })
+
+
+    # 4 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  #  Suppose a baseball player has a p= .300 batting average. What is the probability of X<=150 hits in n=500 at bats? X=150? X>150?
+    
+    
+    
+
+    
+    fd4 = function(x)
+    {
+        return(dpois(x = hits, input$prob4*input$nr4 , log = FALSE))
+    }
+    
+    F4 = function(xx)
+    {
+        return (ppois(q = xx, lambda = input$nr4*input$prob4, lower.tail = TRUE))
+    }
+#    F4 = Vectorize(F4,vectorize.args = "x")
+
+    output$fctDens4 <- renderPlot({
+        hits <- 0:input$nr4 
+        density <- dpois(x = hits, lambda = input$prob4 * input$nr4)
+        plot (x = hits,y=density,type="l")
+    })
+    
+    output$fctRep4 <- renderPlot({
+        hits <- 0:input$nr4 
+        prob <- ppois(q = hits, lambda = input$prob4 * input$nr4, lower.tail = TRUE)
+        plot (x = hits,y=prob,type="l")
+    })
+    
+    
+    output$fctProb4 <- renderPlot({
+        x = 0:input$nr4
+        y = ppois(q = x, lambda = input$prob4 * input$nr4, lower.tail = TRUE)
+        
+        plot(x, y, type= "l", col="red")
+        
+        if(input$SelectProb4=="P(x<=a)"){
+            polygon(c(input$a4,x[x<=input$a4]), c(0,y[x<=input$a4]), col="light blue")
+        }else if(input$SelectProb4=="P(x>=b)"){
+            polygon(c(input$b4,x[input$b4<=x],input$nr4),c(0,y[input$b4<=x],0), col="light blue")
+        }else{
+            x = seq(input$a4,input$b4)
+            y = F4(x)
+            polygon(c(input$a4,x,input$b4), c(0,y,0), col="light blue")
+        }
+    })
+    
+    observeEvent(input$a4,  {
+        updateSliderInput(session = session, "b4", min = input$a4)
+    })
+    
+  
+    observeEvent(input$b4,  {
+        updateSliderInput(session = session, "a4", max = input$b4)
+    })
+    
 }
+
+
 
 # Run the application 
 shinyApp(ui = ui, server = server)
