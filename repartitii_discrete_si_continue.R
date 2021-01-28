@@ -91,3 +91,16 @@ polygon(c(x[x>=1250], max(x), 1250), c(y[x>=1250], 0, 0), col="red")
         x = seq(-10, 10, length.out = 10)
         y = F2(x) 
         plot(x, y, type= "l", col="red")
+
+    lambda = 5
+    fd3 = function(x){
+        return (lambda*exp(-lambda*x))
+    }
+    F3 = function(x){
+        return (integrate(fd3, lower = 0, upper = x)$value)
+    }
+    
+    F3 = Vectorize(F3)
+        x = seq(-10, 10, length.out = 1000)
+        y = F3(x) 
+            

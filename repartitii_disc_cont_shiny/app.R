@@ -8,7 +8,6 @@
 #
 
 library(shiny)
-library(ggplot2)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -42,7 +41,12 @@ ui <- fluidPage(
                         "Probability:",
                         min = 0.1,
                         max = 1,
-                        value = 0.33)
+                        value = 0.33),
+            sliderInput("lmb",
+                        "Lambda:",
+                        min = 0.1,
+                        max = 1,
+                        value = 1)
         ),
 
         # Show a plot of the generated distribution
@@ -54,7 +58,11 @@ ui <- fluidPage(
             plotOutput("fctDens2"),
             plotOutput("fctRep2"),
             plotOutput("fctProb2"),
-            textOutput("valueProb2")
+            textOutput("valueProb2"),
+            plotOutput("fctDens3"),
+            plotOutput("fctRep3"),
+            plotOutput("fctProb3"),
+            textOutput("valueProb3")
         )
     )
 )
@@ -241,6 +249,77 @@ server <- function(input, output, session) {
         }else{
             output$valueProb2 <- renderText({
                 c("Probability: ", P2( input$a, input$b))
+            })
+        }
+    })
+    
+    # x>0
+    fd3 = function(x){
+        return (input$lmb*exp(-input$lmb*x))
+    }
+    F3 = function(x){
+        return (integrate(fd3,lower = 0, upper = x)$value)
+    }
+    F3 = Vectorize(F3, vectorize.args = "x")
+    output$fctDens3 <- renderPlot({
+        x = seq(-10, 10, length.out = 1000)
+        y = fd3(x)
+        plot(x, y, type= "l", col="red")
+    })
+    output$fctRep3 <- renderPlot({
+        x = seq(-10, 10, length.out = 1000)
+        y = F3(x) 
+        plot(x, y, type= "l", col="red")
+    })
+    output$fctProb3 <- renderPlot({
+        x = seq(-10, 10, length.out = 1000)
+        y = F3(x)
+        mini = min(y)
+        plot(x, y, type= "l", col="red")
+        if(input$SelectProb=="P(x<=a)"){
+            x = seq(-10,input$a,length.out = 1000)
+            y = F3(x)
+            polygon(c(x, input$a), c(y, mini), col="light blue")
+        }else if(input$SelectProb=="P(x>=b)"){
+            x = seq(input$b,10,length.out = 1000)
+            y = F3(x)
+            polygon(c(input$b,x, 10), c(mini,y, mini), col="light blue")
+        }else{
+            x = seq(input$a,input$b,length.out = 1000)
+            y = F3(x)
+            polygon(c(input$a,x,input$b), c(mini,y,mini), col="light blue")
+        }
+    })
+    P3 = function(a, b=NULL, param=NULL)
+    {
+        if(is.null(b))
+        {
+            if(is.null(param))
+            {
+                return(F3(a))
+            }
+            else
+            {
+                return (1 - F3 (a))
+            }
+        }
+        else
+        {
+            return (F3(b) - F3(a))
+        }
+    }
+    observeEvent(input$SelectProb, {
+        if(input$SelectProb=="P(x<=a)"){
+            output$valueProb3 <- renderText({
+                c("Probability: ", P3(input$a))
+            })
+        }else if(input$SelectProb=="P(x>=b)"){
+            output$valueProb3 <- renderText({
+                c("Probability: ", P3(input$b, param = 1))
+            })
+        }else{
+            output$valueProb3 <- renderText({
+                c("Probability: ", P3(input$a, input$b))
             })
         }
     })
