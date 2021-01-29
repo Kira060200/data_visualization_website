@@ -84,6 +84,18 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
                                      "Numar biti",
                                      min = 1,
                                      value = 10)
+               ),
+               tabPanel("8",
+                        sliderInput("exp_sales",
+                                    "Expected Sales:",
+                                    min =1,
+                                    max = 10,
+                                    value = 3),
+                        numericInput("events",
+                                     "NO sales",
+                                     min = 1,
+                                     max = 100,
+                                     value = 10)
                )
         ),
         plotOutput("fctMasa"),
@@ -101,6 +113,18 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
     observeEvent(input$tabs,{
+        
+        observeEvent(input$a,
+                     {
+                         updateSliderInput(session = session, "a", max = input$b)
+                         updateSliderInput(session = session, "b", min = input$a)
+                     })
+        observeEvent(input$b,
+                     {
+                         updateSliderInput(session = session, "a", max = input$b)
+                         updateSliderInput(session = session, "b", min = input$a)
+                     })
+        
         if(input$tabs==1){
             FctMasa = function(p){
                 plot(c(1,0),c(p,1-p), lwd=5)
@@ -620,6 +644,94 @@ server <- function(input, output, session) {
                     })
                 }
             })
+            
+        }else if (input$tabs == 8)
+        {
+            
+            # What is the probability of making 2 to 4 sales in a week if the average sales rate is 3 per week?
+            
+            observeEvent(input$events,
+                         {
+                             updateSliderInput(session = session, "a", max = input$events)
+                             updateSliderInput(session = session, "b", max = input$events)
+                   
+                         })
+ 
+            
+            fd8 = function(x)
+            {
+                return(dpois(x = x, lambda = input$exp_sales))
+            }
+            
+            F8 = function(xx)
+            {
+                return (ppois(q = xx, lambda = input$exp_sales, lower.tail = TRUE))
+            }
+            
+            output$fctMasa <- renderPlot({
+                events = 0:input$events
+                density <- density <- dpois(x = events, lambda = input$exp_sales)
+                plot (x = events,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                events = 0:input$events
+                prob <- ppois(q = events, lambda = input$exp_sales, lower.tail = TRUE)
+                plot (x = events,y=prob,type="l")
+            })
+            
+            output$fctProb <- renderPlot({
+                x = 0:input$events
+                y = ppois(q = x, lambda = input$exp_sales, lower.tail = TRUE)
+                
+                plot(x, y, type= "l", col="red")
+                
+                if(input$SelectProb=="P(x<=a)"){
+                    polygon(c(input$a,x[x<=input$a]), c(0,y[x<=input$a]), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    polygon(c(input$b,x[input$b<=x],input$NrInfectati),c(0,y[input$b<=x],0), col="light blue")
+                }else{
+                    x = seq(input$a,input$b)
+                    y = F8(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P8 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F8(a))
+                    }
+                    else
+                    {
+                        return (1 - F8 (a))
+                    }
+                }
+                else
+                {
+                    return (F8(b) - F8(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P8(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P8(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P8(input$a, input$b))
+                    })
+                }
+            })
+            
             
         }
         # when water change, update air
