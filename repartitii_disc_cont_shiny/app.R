@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(ggplot2)
 library(markdown)
 
 
@@ -112,10 +113,12 @@ mainPanel(tabsetPanel(id = "tabs",
                       tabPanel("9",
                                sliderInput("Time",
                                            "Average time spent per visit:",
-                                           min = 0,
+                                           min = 1,
                                            max = 20,
                                            value = 5)
-                      )
+                      ),
+                      tabPanel("11"),
+                      tabPanel("14")
 ),
 plotOutput("fctMasa"),
 plotOutput("fctRep"),
@@ -703,6 +706,21 @@ server <- function(input, output, session) {
                     
                 }
             })
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", pnorm(input$a, input$Mean, input$StDev))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", 1- pnorm(input$b, input$Mean, input$StDev))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", pnorm(input$b, input$Mean, input$StDev) - pnorm(input$a, input$Mean, input$StDev))
+                    })
+                }
+            })
             
         }
         else if (input$tabs == 8)
@@ -793,6 +811,7 @@ server <- function(input, output, session) {
             })
             
             
+            
         }
         else if(input$tabs == 9){
             #Calculating the probabilty of a visitor spending up to X minutes on a site
@@ -830,6 +849,117 @@ server <- function(input, output, session) {
                 }
                 
             })
+            
+        }
+        else if(input$tabs==11){
+            #Weight density curve for women
+            updateSliderInput(session = session, "a", min = 40, max = 80, value = 50)
+            updateSliderInput(session = session, "b", min = 50, max = 90, value = 60)
+            
+            df <- data.frame(
+                sex=factor(rep(c("F", "M"), each=400)),
+                weight=round(c(rnorm(400, mean=55, sd=5))
+            ))
+            
+            output$fctMasa <- renderPlot({
+                ggplot(df, aes(x=weight)) + geom_density()
+            })
+            output$fctRep <- renderPlot({
+                ggplot(df, aes(x=weight)) + stat_ecdf(geom = "line")
+            })
+            output$fctProb <- renderPlot({
+                dat <- with(density(df$weight), data.frame(x, y))
+                if(input$SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                    geom_line()+
+                    geom_area(mapping = aes(x = ifelse(x<=input$a, x, 0)), fill = "red") +
+                    xlim(30, 80)
+                }else if(input$SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$b, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                    
+                }
+            })
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] <= input$a)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] >= input$b)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] >= input$a & df$weight[i] <= input$b)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                    })
+                }
+            })
+            
+        }
+        else if(input$tabs==14){
+            updateSliderInput(session = session, "a", min = 40, max = 300, value = 50)
+            updateSliderInput(session = session, "b", min = 50, max = 400, value = 200)
+            
+            data <- read.table("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/1_OneNum.csv", header=TRUE)
+            
+            dat <- with(density(data$price), data.frame(x, y))
+
+            output$fctMasa <- renderPlot({
+                ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                    geom_line()+
+                    geom_area(mapping = aes(x = 0), fill = "red") +
+                    xlim(10, 350)
+            })
+            output$fctRep <- renderPlot({
+                data %>%
+                    filter( price<400 ) %>%
+                    ggplot( aes(x=price)) +
+                    stat_ecdf(geom = "line")
+            })
+            output$fctProb <- renderPlot({
+                dat <- with(density(data$price), data.frame(x, y))
+                if(input$SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x<=input$a, x, 0)), fill = "red") +
+                        xlim(10, 350)
+                }else if(input$SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$b, x, 0)), fill = "red") +
+                        xlim(30, 400)
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
+                        xlim(10, 350)
+                    
+                }
+            })
+            
         }
         # when water change, update air
         #observeEvent(input$a,  {
