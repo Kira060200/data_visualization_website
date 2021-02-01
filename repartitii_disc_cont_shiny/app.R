@@ -9,6 +9,7 @@
 
 library(shiny)
 library(markdown)
+library(ggplot2)
 
 
 
@@ -46,7 +47,7 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
                                     value = 1)
                ),
                tabPanel("4",
-                        sliderInput("prob",
+                        sliderInput("prob2",
                                     "Probability:",
                                     min = 0.1,
                                     max = 1,
@@ -114,6 +115,100 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
                                     min = 0,
                                     max = 20,
                                     value = 5)
+               ),
+               tabPanel("10",
+                        sliderInput("nr_test",
+                                    "Number of tests",
+                                    min = 1,
+                                    max = 100,
+                                    value = 10),
+                        sliderInput("lim_inf",
+                                    "Limita inferioara:",
+                                    min = 1,
+                                    max = 100,
+                                    value = 1),
+                        sliderInput("lim_sup",
+                                    "Limita superioara:",
+                                    min = 1,
+                                    max = 100,
+                                    value = 3)
+               ),
+               tabPanel("11"),
+               tabPanel("12",
+                        sliderInput("interv",
+                                    "Lungime interval:",
+                                    min = 0,
+                                    max = 100,
+                                    value = 20),
+                        sliderInput("aa",
+                                    "Limita inferioara:",
+                                    min = 0,
+                                    max = 100,
+                                    value = 20),
+                        sliderInput("bb",
+                                    "Limita superioara:",
+                                    min = 0,
+                                    max = 100,
+                                    value = 20)
+               ),
+               tabPanel("13",
+                        sliderInput("ex13_x",
+                                    "X:",
+                                    min = 1,
+                                    max = 100,
+                                    value = 14),
+                        sliderInput("ex13_m",
+                                    "M:",
+                                    min = 1,
+                                    max = 100,
+                                    value = 70),
+                        sliderInput("ex13_n",
+                                    "N:",
+                                    min = 1,
+                                    max = 100,
+                                    value = 30),
+                        sliderInput("ex13_k",
+                                    "K:",
+                                    min = 1,
+                                    max = 100,
+                                    value = 20)
+               ),
+               tabPanel("14"),
+               tabPanel("15",
+                        sliderInput("pr",
+                                    "Probabilitate:",
+                                    min = 0,
+                                    max = 1,
+                                    value = 0.2),
+                        numericInput("k",
+                                    "k:",
+                                    min = 0,
+                                    value = 10)
+               ),
+               tabPanel("16",
+                        numericInput("lmb",
+                                    "Lambda:",
+                                    min = 0,
+                                    value = 10),
+                        numericInput("k2",
+                                     "k:",
+                                     min = 0,
+                                     value = 25)
+               ),
+               tabPanel("17",
+                        numericInput("pr2",
+                                     "Probabilitate:",
+                                     min = 0,
+                                     max = 1,
+                                     value = 0.2),
+                        numericInput("k3",
+                                     "k:",
+                                     min = 1,
+                                     value = 10),
+                        numericInput("r",
+                                     "r:",
+                                     min = 1,
+                                     value = 5)
                )
                
         ),
@@ -438,12 +533,12 @@ server <- function(input, output, session) {
             
             fd4 = function(x)
             {
-                return(dpois(x, input$prob*input$NrAruncari , log = FALSE))
+                return(dpois(x, input$prob2*input$NrAruncari , log = FALSE))
             }
             
             F4 = function(xx)
             {
-                return (ppois(q = xx, lambda = input$NrAruncari*input$prob, lower.tail = TRUE))
+                return (ppois(q = xx, lambda = input$NrAruncari*input$prob2, lower.tail = TRUE))
             }
             #    F4 = Vectorize(F4,vectorize.args = "x")
             
@@ -641,7 +736,7 @@ server <- function(input, output, session) {
                 segments(x, 0, x, y, col="red")
             })
             output$fctRep <- renderPlot({
-                x = seq(0, input$NrBiti, length.out = 1000)
+                x = seq(-1, input$NrBiti, length.out = 1000)
                 y = F(x) 
                 plot(x, y, type= "l", col="red")
             })
@@ -867,8 +962,7 @@ server <- function(input, output, session) {
                 updateSliderInput(session = session, "a", max = input$b)
             })
             
-        }
-        else if(input$tabs == 9){
+        }else if(input$tabs == 9){
             #Calculating the probabilty of a visitor spending up to X minutes on a site
             updateSliderInput(session = session, "a", min = 0, max = 15, value = 2)
             updateSliderInput(session = session, "b", min = 0, max = 20, value = 5)
@@ -912,22 +1006,757 @@ server <- function(input, output, session) {
             observeEvent(input$b,  {
                 updateSliderInput(session = session, "a", max = input$b)
             })
+        }else if (input$tabs == 10)
+        {
+            # continua uniforma
+            # select N numbers between X and Y
+            
+            
+            
+            observeEvent(input$lim_sup,
+                         {
+                             updateSliderInput(session = session, "a", max = input$lim_sup)
+                             updateSliderInput(session = session, "b", max = input$lim_sup)
+                         })
+            
+            
+            fd10 = function(x)
+            {
+                return(dunif(x = x, min=input$lim_inf,max=input$lim_sup))
+            }
+            
+            F10 = function(xx)
+            {
+                return (punif(q = xx, min=input$lim_inf,max=input$lim_sup, lower.tail = TRUE))
+            }
+            
+            
+            output$fctMasa <- renderPlot({
+                x = runif(input$nr_test, min = input$lim_inf, max = input$lim_sup)
+                density <- fd10(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x = runif(input$nr_test, min = input$lim_inf, max = input$lim_sup)
+                prob <- F10(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            
+            
+            output$fctProb <-renderPlot({
+                x = seq(input$lim_inf , input$lim_sup)
+                y = fd10(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red", ylim = c(0,1))
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
+                    polygon(c(input$lim_inf,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],input$lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    
+                    x = seq(input$a , input$b)
+                    y = fd10(x)
+                    
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            
+            P10 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F10(a))
+                    }
+                    else
+                    {
+                        return (1 - F10 (a))
+                    }
+                }
+                else
+                {
+                    return (F10(b) - F10(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P10(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P10(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P10(input$a, input$b))
+                    })
+                }
+            })
+            
+            
+        }else if(input$tabs==11){
+            #Weight density curve for women
+            updateSliderInput(session = session, "a", min = 40, max = 80, value = 50)
+            updateSliderInput(session = session, "b", min = 50, max = 90, value = 60)
+            
+            df <- data.frame(
+                sex=factor(rep(c("F", "M"), each=400)),
+                weight=round(c(rnorm(400, mean=55, sd=5))
+                ))
+            
+            output$fctMasa <- renderPlot({
+                ggplot(df, aes(x=weight)) + geom_density()
+            })
+            output$fctRep <- renderPlot({
+                ggplot(df, aes(x=weight)) + stat_ecdf(geom = "line")
+            })
+            output$fctProb <- renderPlot({
+                dat <- with(density(df$weight), data.frame(x, y))
+                if(input$SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x<=input$a, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                }else if(input$SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$b, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                    
+                }
+            })
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] <= input$a)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] >= input$b)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] >= input$a & df$weight[i] <= input$b)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                    })
+                }
+            })
+            
+        }else if (input$tabs == 12){
+            # 12 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            
+            updateSliderInput(session = session, "aa", min=0, max = input$interv)
+            updateSliderInput(session = session, "bb", min=0, max = input$interv)
+            fm = function(x){
+                if(x>=input$aa && x<=input$bb)
+                    return(1/(input$bb-input$aa+1))
+                else 
+                    return (0)
+            }
+            F = function(x){
+                if(x>=input$aa && x<input$bb)
+                    return((1-input$aa+floor(x))/(input$bb-input$aa+1))
+                else if(x==input$bb)
+                    return (1)
+                else 
+                    return (0)
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            output$fctMasa <- renderPlot({
+                x = seq(0, input$interv, by=1)
+                y=fm(0)
+                for(i in 1:input$interv){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, ylim = c(0,1))
+                segments(x, 0, x, y, col="red")
+            })
+            output$fctRep <- renderPlot({
+                x = seq(-1, input$interv, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red", ylim = c(0,1))
+            })
+            output$fctProb <- renderPlot({
+                x = seq(0, input$interv, by=1)
+                y=fm(0)
+                for(i in 1:input$interv){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, ylim = c(0,1))
+                #segments(x, 0, x, y, col="red")
+                if(input$SelectProb=="P(x<=a)"){
+                    x = seq(0, input$a, by=1)
+                    y=fm(0)
+                    for(i in 1:input$interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(input$aa, input$a)
+                    segments(x, 0, x, y, col="blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    x = seq(input$b, input$interv, by=1)
+                    y=fm(0)
+                    for(i in 1:input$interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(input$b, input$bb)
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(input$a, input$b, by=1)
+                    y=fm(0)
+                    for(i in 1:input$interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(input$a, input$b)
+                    segments(x, 0, x, y, col="blue")
+                }
+            })
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                    })
+                }
+            })
+            observeEvent(input$a,  {
+                updateSliderInput(session = session, "b", min = input$a)
+            })
+            
+            
+            observeEvent(input$b,  {
+                updateSliderInput(session = session, "a", max = input$b)
+            })
+            observeEvent(input$aa,  {
+                updateSliderInput(session = session, "bb", min = input$aa)
+                updateSliderInput(session = session, "a", min = input$aa)
+            })
+            
+            
+            observeEvent(input$bb,  {
+                updateSliderInput(session = session, "aa", max = input$bb)
+                updateSliderInput(session = session, "b", max = input$bb)
+                updateSliderInput(session = session, "a", max = min(input$bb, input$b))
+            })
+            
+        }else if (input$tabs == 13)
+        {
+            # What is the probability of selecting x = 14 red marbles from a sample of k = 20 taken from an urn containing m = 70 red marbles
+            # and n = 30 green marbles?
+            
+            
+            updateSliderInput(session = session, "a", max = 100)
+            updateSliderInput(session = session, "b", max = 100)
+            
+            
+            observeEvent(input$ex13_x,
+                         {
+                             updateSliderInput(session = session, "ex13_n", min = input$ex13_x + input$ex13_m)  
+                         })
+            observeEvent(input$ex13_m,
+                         {
+                             updateSliderInput(session = session, "ex13_n", min = input$ex13_x + input$ex13_m)  
+                         })
+            
+            
+            
+            fd13 = function(x)
+            {
+                return(dhyper(x = x, m = input$ex13_m, n = input$ex13_n, k = input$ex13_k))
+            }
+            
+            F13 = function(xx)
+            {
+                return (phyper(q = xx, m = input$ex13_m, n = input$ex13_n, k = input$ex13_k, lower.tail = TRUE))
+            }
+            
+            output$fctMasa <- renderPlot({
+                x = seq(1:input$ex13_k)
+                density <- fd13(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x = seq(1:input$ex13_k)
+                prob <- F13(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            output$fctProb <-renderPlot({
+                x = seq(1:input$ex13_k)
+                y = fd13(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") # , ylim = c(0,1))
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
+                    polygon(c(input$lim_inf,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],input$lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(input$a , input$b)
+                    y = fd13(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P13 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F13(a))
+                    }
+                    else
+                    {
+                        return (1 - F13 (a))
+                    }
+                }
+                else
+                {
+                    return (F13(b) - F13(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P13(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P13(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P13(input$a, input$b))
+                    })
+                }
+            })
+            
+        }else if(input$tabs==14){
+            updateSliderInput(session = session, "a", min = 40, max = 300, value = 50)
+            updateSliderInput(session = session, "b", min = 50, max = 400, value = 200)
+            
+            data <- read.table("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/1_OneNum.csv", header=TRUE)
+            
+            dat <- with(density(data$price), data.frame(x, y))
+            
+            output$fctMasa <- renderPlot({
+                ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                    geom_line()+
+                    geom_area(mapping = aes(x = 0), fill = "red") +
+                    xlim(10, 350)
+            })
+            output$fctRep <- renderPlot({
+                data %>%
+                    filter( price<400 ) %>%
+                    ggplot( aes(x=price)) +
+                    stat_ecdf(geom = "line")
+            })
+            output$fctProb <- renderPlot({
+                dat <- with(density(data$price), data.frame(x, y))
+                if(input$SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x<=input$a, x, 0)), fill = "red") +
+                        xlim(10, 350)
+                }else if(input$SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$b, x, 0)), fill = "red") +
+                        xlim(30, 400)
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
+                        xlim(10, 350)
+                    
+                }
+            })
+            
+        }else if (input$tabs == 15){
+            # 15 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            updateSliderInput(session = session, "a", min=0, max = input$k)
+            updateSliderInput(session = session, "b", min=0, max = input$k)
+            observeEvent(input$k,  {
+                updateSliderInput(session = session, "a", min=0, max = input$k)
+                updateSliderInput(session = session, "b", min=0, max = input$k)
+            })
+            fm = function(x){
+                return(dgeom(x, prob = input$pr))
+            }
+            F = function(x){
+                return(pgeom(x, prob = input$pr))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            output$fctMasa <- renderPlot({
+                x = seq(0, input$k, by=1)
+                y=fm(0)
+                for(i in 1:input$k){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            })
+            output$fctRep <- renderPlot({
+                x = seq(-1, input$k, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red")
+            })
+            output$fctProb <- renderPlot({
+                x = seq(0, input$k, by=1)
+                y=fm(0)
+                for(i in 1:input$k){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(input$SelectProb=="P(x<=a)"){
+                    x = seq(0, input$a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    x = seq(input$b, input$k, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(input$a, input$b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            })
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                    })
+                }
+            })
+            observeEvent(input$a,  {
+                updateSliderInput(session = session, "b", min = input$a)
+            })
+            
+            
+            observeEvent(input$b,  {
+                updateSliderInput(session = session, "a", max = input$b)
+            })
+            
+        }else if (input$tabs == 16){
+            # 16 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            updateSliderInput(session = session, "a", min=0, max = input$k2)
+            updateSliderInput(session = session, "b", min=0, max = input$k2)
+            observeEvent(input$k2,  {
+                updateSliderInput(session = session, "a", min=0, max = input$k2)
+                updateSliderInput(session = session, "b", min=0, max = input$k2)
+            })
+            fm = function(x){
+                return(dpois(x, lambda = input$lmb))
+            }
+            F = function(x){
+                return(ppois(x, lambda = input$lmb))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            output$fctMasa <- renderPlot({
+                x = seq(0, input$k2, by=1)
+                y=fm(0)
+                for(i in 1:input$k2){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            })
+            output$fctRep <- renderPlot({
+                x = seq(-1, input$k2, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red")
+            })
+            output$fctProb <- renderPlot({
+                x = seq(0, input$k2, by=1)
+                y=fm(0)
+                for(i in 1:input$k2){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(input$SelectProb=="P(x<=a)"){
+                    x = seq(0, input$a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    x = seq(input$b, input$k2, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(input$a, input$b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            })
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                    })
+                }
+            })
+            observeEvent(input$a,  {
+                updateSliderInput(session = session, "b", min = input$a)
+            })
+            
+            
+            observeEvent(input$b,  {
+                updateSliderInput(session = session, "a", max = input$b)
+            })
+            
+        }else if (input$tabs == 17){
+            # 17 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            
+            updateSliderInput(session = session, "a", min=0, max = input$k3)
+            updateSliderInput(session = session, "b", min=0, max = input$k3)
+            observeEvent(input$k3,  {
+                updateSliderInput(session = session, "a", min=0, max = input$k3)
+                updateSliderInput(session = session, "b", min=0, max = input$k3)
+            })
+            fm = function(x){
+                if(x>=input$r)
+                    return(factorial(x-1)/(factorial(input$r-1)*factorial(x-input$r))*(1-input$pr2)^(x-input$r)*input$pr2^input$r)
+                else
+                    return (0)
+            }
+            F = function(x){
+                if(x>=input$r)
+                    return (fm(x)+F(x-1))
+                else return (0)
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            output$fctMasa <- renderPlot({
+                x = seq(0, input$k3, by=1)
+                y=fm(0)
+                for(i in 1:input$k3){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            })
+            output$fctRep <- renderPlot({
+                x = seq(-1, input$k3, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red", ylim = c(0,1))
+            })
+            output$fctProb <- renderPlot({
+                x = seq(0, input$k3, by=1)
+                y=fm(0)
+                for(i in 1:input$k3){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(input$SelectProb=="P(x<=a)"){
+                    x = seq(0, input$a, by=1)
+                    y=fm(0)
+                    for(i in 1:input$a){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(input$r, input$a)
+                    print(y)
+                    segments(x, 0, x, y, col="blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    x = seq(input$b, input$k3, by=1)
+                    y=fm(input$b)
+                    for(i in input$b+1:input$k3){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(input$b, input$k3)
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(input$a, input$b, by=1)
+                    y=fm(input$a)
+                    for(i in input$a+1:input$b){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(input$a, input$b)
+                    segments(x, 0, x, y, col="blue")
+                }
+            })
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                    })
+                }
+            })
+            observeEvent(input$a,  {
+                updateSliderInput(session = session, "b", min = input$a)
+            })
+            
+            
+            observeEvent(input$b,  {
+                updateSliderInput(session = session, "a", max = input$b)
+            })
+            
         }
-        # when water change, update air
-        #observeEvent(input$a,  {
-        #    updateSliderInput(session = session, "b", min = input$a)
-        #})
-        #
-        ## when air change, update water
-        #observeEvent(input$b,  {
-        #    updateSliderInput(session = session, "a", max = input$b)
-        #})
-        
-        
-        
-        # output$valueProb <- renderText({
-        #     c("Probability: ", P(input$prob, input$a, input$b))
-        # })
     })    
 }
 
