@@ -1,0 +1,552 @@
+---
+title: "docs_proiect"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Ex 2
+Modelam repartitia data de o v.a continua cu formula $$f = (e^x) / ((1+e^x)^2)$$
+```{r ex2}
+fd2 = function(x){
+         return (exp(x)/(1 + exp(x))^2)
+}
+F2 = function(x){
+      return (integrate(fd2,lower = -Inf, upper = x)$value)
+}
+F2 = Vectorize(F2, vectorize.args = "x")
+a=0
+b=1
+# fct masa
+x = seq(-10, 10, length.out = 1000)
+y = fd2(x)
+# fct repartitie
+plot(x, y, type= "l", col="red")
+x = seq(-10, 10, length.out = 1000)
+y = F2(x) 
+
+plot(x, y, type= "l", col="red")
+x = seq(-10, 10, length.out = 1000)
+y = fd2(x) 
+
+plot(x, y, type= "l", col="red")
+SelectProb = "P(x<=a)"            
+if(SelectProb=="P(x<=a)"){
+  x = seq(-10,a,length.out = 1000)
+  y = fd2(x)
+  polygon(c(-10,x,a), c(-10,y,0), col="light blue")
+}else if(SelectProb=="P(x>=b)"){
+  x = seq(b,10,length.out = 1000)
+  y = fd2(x)
+  polygon(c(b,x,10), c(0,y,0), col="light blue")
+}else{
+  x = seq(a,b,length.out = 1000)
+  y = fd2(x)
+  polygon(c(a,x,b), c(0,y,0), col="light blue")
+}
+  P2 = function(a, b=NULL, param=NULL)
+  {
+    if(is.null(b))
+    {
+       if(is.null(param))
+       {
+          return(F2(a))
+       }
+       else
+       {
+          return (1 - F2(a))
+       }
+    }
+    else
+    {
+          return (F2(b) - F2(a))
+    }
+}
+
+
+if(SelectProb=="P(x<=a)"){
+  c("Probability: ", P2(a))
+}else if(SelectProb=="P(x>=b)"){
+  c("Probability: ", P2(b, param = 1))
+}else{
+  c("Probability: ", P2( a, b))
+}
+            
+```
+
+### Ex 6 (Repartitie binomiala pentru v.a. discreta)
+Fie un bit care este transmis pe un canal bruiat si are probabilitatea *p* sa fie transmis incorect.
+Pentru a imbunatati fiabilitatea comunicarii, este transmis de *n* ori, unde *n* impar
+Presupunem ca avem un decodor care decide care bit e corect dupa numarul majoritar de biti transmisi.
+*n* si *p* dati ca parametru, *x*-nr biti transmisi cu eroare, *X~B(n, p)*
+```{r ex6}
+
+            # 6 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            
+            ProbBit = 0.1
+            NrIncercari = 15
+            NrBiti = 10
+            
+            a = 2
+            b = 4
+
+            fm = function(x){
+                return (dbinom(x, size = NrIncercari, prob = ProbBit))
+            }
+            F = function(x){
+                return (pbinom(x, size = NrIncercari, prob = ProbBit))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, NrBiti, by=1)
+                y = fm(x)
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            # fct rept
+                x = seq(-1, NrBiti, length.out = 1000)
+                y = F(x) 
+                plot(x, y, type= "l", col="red")
+            
+                x = seq(0, NrBiti, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red")
+                
+                SelectProb = "P(x<=a)"
+                
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a)
+                    y = F(x)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, NrBiti)
+                    y = F(x)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }else{
+                    x = seq(a, b)
+                    y = F(x)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex 12 (Repartitie uniforma pentru v.a. discreta)
+Avem cu bile numerotate de la 1 la *interv*. Punem in urna bilele din [*aa,bb*] si ne interesam la probabilitatea de a le alege.
+
+```{r ex12}
+
+            # 12 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            aa = 20
+            bb = 25
+            a = 10
+            b = 22
+            interv = 30
+            SelectProb="P(x>=b)"
+            fm = function(x){
+                if(x>=aa && x<=bb)
+                    return(1/(bb-aa+1))
+                else 
+                    return (0)
+            }
+            F = function(x){
+                if(x>=aa && x<bb)
+                    return((1-aa+floor(x))/(bb-aa+1))
+                else if(x==bb)
+                    return (1)
+                else 
+                    return (0)
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, interv, by=1)
+                y=fm(0)
+                for(i in 1:interv){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, ylim = c(0,1))
+                segments(x, 0, x, y, col="red")
+            # fct rept
+                x = seq(-1, interv, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red", ylim = c(0,1))
+              
+                x = seq(0, interv, by=1)
+                y=fm(0)
+                for(i in 1:interv){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, ylim = c(0,1))
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(0)
+                    for(i in 1:interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(aa, a)
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, interv, by=1)
+                    y=fm(0)
+                    for(i in 1:interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(b, bb)
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b, by=1)
+                    y=fm(0)
+                    for(i in 1:interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(a, b)
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex 15 (Repartitie geometrica pentru v.a. discreta)
+Aruncam in mod repetat cu o moneda cu probabilitatea *pr* de a obtine cap. Fie *k* numarul de aruncari. Astfel, *X* va reprezenta numarul de aruncari pana obtinem primul succes 
+```{r ex15}
+
+            # 15 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            a = 3
+            b = 6
+            pr = 0.2
+            k = 10
+            SelectProb="P(a<=x<=b)"
+            fm = function(x){
+                return(dgeom(x, prob = pr))
+            }
+            F = function(x){
+                return(pgeom(x, prob = pr))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, k, by=1)
+                y=fm(0)
+                for(i in 1:k){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            # fct rep
+                x = seq(-1, k, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red")
+                
+                x = seq(0, k, by=1)
+                y=fm(0)
+                for(i in 1:k){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, k, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+            
+```
+
+### Ex 16 (Repartitie poisson pentru v.a. discreta)
+Numarul de masini intr-o intersectie intr-o zi este *lmb*. Ne interesam la probabilitatea de a avea *k2* masini intr-o alta zi
+```{r ex16}
+
+            # 16 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            a = 4
+            b = 7
+            lmb = 10
+            k2 = 25
+            
+            SelectProb="P(x>=b)"
+            fm = function(x){
+                return(dpois(x, lambda = lmb))
+            }
+            F = function(x){
+                return(ppois(x, lambda = lmb))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, k2, by=1)
+                y=fm(0)
+                for(i in 1:k2){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+                
+            # fct rep
+                x = seq(-1, k2, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red")
+                
+                x = seq(0, k2, by=1)
+                y=fm(0)
+                for(i in 1:k2){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, k2, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex 17 (Repartitie negativ binomiala pentru v.a. discreta)
+Modelam numarul de aruncari ale unei monede cu probabilitate *pr2* pana obtinem pentru prima oara *r* succese.
+```{r ex17}
+
+            # 17 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            a = 12
+            b = 16
+            pr2 = 0.2
+            k3 = 20
+            r = 5
+            
+            SelectProb="P(x<=a)"
+            fm = function(x){
+                if(x>=r)
+                    return(factorial(x-1)/(factorial(r-1)*factorial(x-r))*(1-pr2)^(x-r)*pr2^r)
+                else
+                    return (0)
+            }
+            F = function(x){
+                if(x>=r)
+                    return (fm(x)+F(x-1))
+                else return (0)
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, k3, by=1)
+                y=fm(0)
+                for(i in 1:k3){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            # fct rep
+                x = seq(-1, k3, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red", ylim = c(0,1))
+                
+                x = seq(0, k3, by=1)
+                y=fm(0)
+                for(i in 1:k3){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(0)
+                    for(i in 1:a){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(r, a)
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, k3, by=1)
+                    y=fm(b)
+                    for(i in b+1:k3){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(b, k3)
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b, by=1)
+                    y=fm(a)
+                    for(i in a+1:b){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(a, b)
+                    segments(x, 0, x, y, col="blue")
+                }
+                
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
