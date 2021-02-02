@@ -209,7 +209,20 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
                                      "r:",
                                      min = 1,
                                      value = 5)
-               )
+               ),
+               tabPanel("18",
+                        numericInput("meanlog",
+                                     "Mean on the log scale:",
+                                     min = 0,
+                                     max = 1,
+                                     value = 1),
+                        numericInput("sdlog",
+                                     "Standard Deviation on the log scale:",
+                                     min = 0,
+                                     max = 1,
+                                     value = 0.25)
+                        )
+               
                
         ),
         plotOutput("fctMasa"),
@@ -868,6 +881,22 @@ server <- function(input, output, session) {
                 observeEvent(input$b,  {
                     updateSliderInput(session = session, "a", max = input$b)
                 })
+                
+                observeEvent(input$SelectProb, {
+                    if(input$SelectProb=="P(x<=a)"){
+                        output$valueProb <- renderText({
+                            c("Probability: ", pnorm(input$a, input$Mean, input$StDev))
+                        })
+                    }else if(input$SelectProb=="P(x>=b)"){
+                        output$valueProb <- renderText({
+                            c("Probability: ", 1- pnorm(input$b, input$Mean, input$StDev))
+                        })
+                    }else{
+                        output$valueProb <- renderText({
+                            c("Probability: ", pnorm(input$b, input$Mean, input$StDev) - pnorm(input$a, input$Mean, input$StDev))
+                        })
+                    }
+                })
         }else if (input$tabs == 8){
             
             # What is the probability of making 2 to 4 sales in a week if the average sales rate is 3 per week?
@@ -1005,6 +1034,22 @@ server <- function(input, output, session) {
             
             observeEvent(input$b,  {
                 updateSliderInput(session = session, "a", max = input$b)
+            })
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", pexp(input$a, 1/input$Time))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", 1 - pexp(input$b, 1/input$Time))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", pexp(input$b, 1/input$Time) - pexp(input$a, 1/input$Time))
+                    })
+                }
             })
         }else if (input$tabs == 10)
         {
@@ -1403,6 +1448,10 @@ server <- function(input, output, session) {
             
             dat <- with(density(data$price), data.frame(x, y))
             
+            f14 = function(datt){
+                return(datt)
+            }
+            
             output$fctMasa <- renderPlot({
                 ggplot(data = dat, mapping = aes(x = x, y = y)) +
                     geom_line()+
@@ -1410,10 +1459,7 @@ server <- function(input, output, session) {
                     xlim(10, 350)
             })
             output$fctRep <- renderPlot({
-                data %>%
-                    filter( price<400 ) %>%
-                    ggplot( aes(x=price)) +
-                    stat_ecdf(geom = "line")
+                ggplot(dat, aes(x=x)) + stat_ecdf(geom = "line")
             })
             output$fctProb <- renderPlot({
                 dat <- with(density(data$price), data.frame(x, y))
@@ -1433,6 +1479,22 @@ server <- function(input, output, session) {
                         geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
                         xlim(10, 350)
                     
+                }
+            })
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                    })
                 }
             })
             
@@ -1756,6 +1818,83 @@ server <- function(input, output, session) {
                 updateSliderInput(session = session, "a", max = input$b)
             })
             
+        }
+        else if(input$tabs == 18){
+
+            updateSliderInput(session = session, "a", min=0, max = 5)
+            updateSliderInput(session = session, "b", min=0, max = 5)
+            
+            f18 = function(x){
+                return(dlnorm(x=x, meanlog = input$meanlog, sdlog = input$sdlog, log = FALSE))
+            }
+            
+            F18 = function(xx){
+                return(plnorm(q=xx, meanlog = input$meanlog, sdlog = input$sdlog, log = FALSE))
+            }
+            output$fctMasa <- renderPlot({
+                x = seq(0:15)
+                density <- f18(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x = seq(0:15)
+                prob <- F18(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            output$fctProb <-renderPlot({
+                x = seq(0:15)
+                y = f18(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") # , ylim = c(0,1))
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
+                    polygon(c(input$lim_inf,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],input$lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(input$a , input$b)
+                    y = f18(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P18 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F18(a))
+                    }
+                    else
+                    {
+                        return (1 - F18 (a))
+                    }
+                }
+                else
+                {
+                    return (F18(b) - F18(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P18(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P18(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P18(input$a, input$b))
+                    })
+                }
+            })           
         }
     })    
 }
