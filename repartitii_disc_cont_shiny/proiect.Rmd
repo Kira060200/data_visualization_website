@@ -1,0 +1,541 @@
+---
+title: "Proiect"
+output: html_document
+---
+
+```{r ex1}
+          
+            # 1
+
+            a = 0
+            b = 1
+            prob = 0.33
+            p = prob
+
+            FctMasa = function(p){
+                plot(c(1,0),c(p,1-p), lwd=5)
+                segments(c(1,0), 0, c(1,0), c(p,1-p), col="red")
+            }
+            
+            
+            F = function(x,p){
+                if (x<0){
+                    y=0
+                }else if (x<1){
+                    y = 1-p
+                }else{
+                    y=1
+                }
+                return(y)
+            }
+            
+            P = function(p, a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a, p))
+                    }
+                    else
+                    {
+                        return (1 - F(a, p))
+                    }
+                }
+                else
+                {
+                    return (F(b, p) - F(a, p))
+                }
+            }
+            
+            fctMasa <- ({FctMasa(prob)})
+            
+            
+            
+                
+            
+            
+            SelectProb = "P(x<=a)"
+            
+            if(SelectProb=="P(x<=a)"){
+                valueProb <- c("Probability: ", P(prob, a))
+            }else if(SelectProb=="P(x>=b)"){
+                valueProb <- c("Probability: ", P(prob, b, param = 1)+F(b, prob))
+            }else{
+                valueProb <- c("Probability: ", P(prob, a, b)+F(a, prob))
+            }
+     
+            fctRep <- ({
+                F = Vectorize(F, vectorize.args = "x")
+                t = seq(-1,2,length.out = 1000)
+                y = F(t,prob)
+                plot(t, y, type= "l", col="red")
+            })
+            
+            fctProb <- ({
+                F = Vectorize(F, vectorize.args = "x")
+                t = seq(-1,2,length.out = 1000)
+                y = F(t,prob)
+                plot(t, y, type= "l", col="red")
+                
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0,a)
+                    y=F(x, prob)
+                    #lines(x, y, col="blue")
+                    
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                    #polygon(c(0,x,a), c(0,y,0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b,2)
+                    y = F(x,prob)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }else{
+                    x = seq(a,b)
+                    y = F(x,prob)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }
+                
+            })
+                
+
+```
+## R Markdown
+
+
+
+```{r ex4}
+
+            # 4
+
+            prob2 = 0.33
+            NrAruncari= 300
+            a = 0
+            b = 1
+
+            fd4 = function(x)
+            {
+                return(dpois(x, prob2*NrAruncari , log = FALSE))
+            }
+            
+            F4 = function(xx)
+            {
+                return (ppois(q = xx, lambda = NrAruncari*prob2, lower.tail = TRUE))
+            }
+            
+            hits <- 0:NrAruncari 
+            density <- fd4(hits)
+            plot (x = hits,y=density,type="l")
+         
+            prob <- F4(hits)
+            plot (x = hits,y=prob,type="l")
+          
+            x = 0:NrAruncari
+            y = fd4(x)
+            plot(x, y, type= "l", col="red")
+                
+            SelectProb = "P(x<=a)"
+                
+            if(SelectProb=="P(x<=a)"){
+                 polygon(c(0,x[x<=a],a), c(0,y[x<=a],0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+                polygon(c(b,x[b<=x],NrAruncari),c(0,y[b<=x],0), col="light blue")
+            }else{
+                x = seq(a,b)
+                y = fd4(x)
+                polygon(c(a,x,b), c(0,y,0), col="light blue")
+            }
+         
+          
+            P4 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F4(a))
+                    }
+                    else
+                    {
+                        return (1 - F4 (a))
+                    }
+                }
+                else
+                {
+                    return (F4(b) - F4(a))
+                }
+            }
+            
+            if(SelectProb=="P(x<=a)"){
+                valueProb <-c("Probability: ", P4(a))
+            }else if(SelectProb=="P(x>=b)"){
+                valueProb <- c("Probability: ", P4(b, param = 1))
+            }else{
+                valueProb <- c("Probability: ", P4(a, b))
+            }
+        
+
+```
+
+
+## Including Plots
+
+
+```{r ex5}
+            # 5
+            
+            NrInfectati = 1000
+            prob_infectare = 0.001
+            a = 0
+            b = 1
+
+            fd5 = function(x)
+            {
+                return(dpois(x = x, lambda = NrInfectati * prob_infectare))
+            }
+            
+            F5 = function(xx)
+            {
+                return (ppois(q = xx, lambda = NrInfectati * prob_infectare, lower.tail = TRUE))
+            }
+            
+            fctMasa <- ({
+                x <- 0:10
+                density <- fd5(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            fctRep <- ({
+                x <- 0:10
+                prob <- F5(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            fctProb <- ({
+                x = 0:10
+                y = fd5(x)
+                
+                plot(x, y, type= "l", col="red")
+                
+                if(SelectProb=="P(x<=a)"){
+                    polygon(c(0,x[x<=a],a), c(0,y[x<=a],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    polygon(c(b,x[b<=x],NrInfectati),c(0,y[b<=x],0), col="light blue")
+                }else{
+                    x = seq(a,b)
+                    y = fd5(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                    
+                }
+            })
+            
+            P5 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F5(a))
+                    }
+                    else
+                    {
+                        return (1 - F5 (a))
+                    }
+                }
+                else
+                {
+                    return (F5(b) - F5(a))
+                }
+            }
+            
+            SelectProb = "P(x<=a)" 
+            
+            if(SelectProb=="P(x<=a)"){
+                valueProb <- c("Probability: ", P5(a))
+            }else if(SelectProb=="P(x>=b)"){
+                valueProb <- c("Probability: ", P5(b, param = 1))
+            }else{
+                valueProb <- c("Probability: ", P5(a, b))
+            }
+        
+
+```
+
+
+
+```{r ex8}
+
+            # 8
+
+            exp_sales = 3
+            events = 10
+            a = 0
+            b = 1
+            
+            
+            fd8 = function(x)
+            {
+                return(dpois(x = x, lambda = exp_sales))
+            }
+            
+            F8 = function(xx)
+            {
+                return (ppois(q = xx, lambda = exp_sales, lower.tail = TRUE))
+            }
+            
+            fctMasa <- ({
+                ee = 0:events
+                density <- fd8(ee)
+                plot (x = ee,y=density,type="l")
+            })
+            
+            fctRep <- ({
+                e2 = 0:events
+                prob <- ppois(q = e2, lambda = exp_sales, lower.tail = TRUE)
+                plot (x = e2,y=prob,type="l")
+            })
+            
+            fctProb <- ({
+                x = 0:events
+                y = fd8(x)
+                
+                plot(x, y, type= "l", col="red")
+                
+                if(SelectProb=="P(x<=a)"){
+                    polygon(c(0,x[x<=a],a), c(0,y[x<=a],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    polygon(c(b,x[b<=x],NrInfectati),c(0,y[b<=x],0), col="light blue")
+                }else{
+                    x = seq(a,b)
+                    y = fd8(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P8 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F8(a))
+                    }
+                    else
+                    {
+                        return (1 - F8 (a))
+                    }
+                }
+                else
+                {
+                    return (F8(b) - F8(a))
+                }
+            }
+            
+            SelectProb = "P(x>=b)"
+            
+            if(SelectProb=="P(x<=a)"){
+                valueProb <- c("Probability: ", P8(a))
+            }else if(SelectProb=="P(x>=b)"){
+                valueProb <- c("Probability: ", P8(b, param = 1))
+            }else{
+                valueProb <- c("Probability: ", P8(a, b))
+            
+            }
+        
+            
+```
+
+```{r ex10}
+            
+            # 10
+
+            nr_test = 10
+            lim_inf = 1
+            lim_sup = 3
+            
+            
+            
+            fd10 = function(x)
+            {
+                return(dunif(x = x, min=lim_inf,max=lim_sup))
+            }
+            
+            F10 = function(xx)
+            {
+                return (punif(q = xx, min=lim_inf,max=lim_sup, lower.tail = TRUE))
+            }
+            
+            
+            fctMasa <- ({
+                x = runif(nr_test, min = lim_inf, max = lim_sup)
+                density <- fd10(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            fctRep <- ({
+                x = runif(nr_test, min = lim_inf, max = lim_sup)
+                prob <- F10(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            
+            
+            fctProb <-({
+                x = seq(lim_inf , lim_sup)
+                y = fd10(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red", ylim = c(0,1))
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(lim_inf,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    
+                    x = seq(a , b)
+                    y = fd10(x)
+                    
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            
+            P10 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F10(a))
+                    }
+                    else
+                    {
+                        return (1 - F10 (a))
+                    }
+                }
+                else
+                {
+                    return (F10(b) - F10(a))
+                }
+            }
+            
+            SelectProb = "P(x<=a)"
+            
+            if(SelectProb=="P(x<=a)"){
+                valueProb <- c("Probability: ", P10(a))
+            }else if(SelectProb=="P(x>=b)"){
+                valueProb <- c("Probability: ", P10(b, param = 1))
+            }else{
+                valueProb <- c("Probability: ", P10(a, b))
+                
+            }
+    
+
+
+```
+
+
+```{r ex13}
+
+            # 13
+
+            ex13_x = 14
+            ex13_m = 70
+            ex13_n = 30
+            ex13_k = 20
+
+           
+            fd13 = function(x)
+            {
+                return(dhyper(x = x, m = ex13_m, n = ex13_n, k = ex13_k))
+            }
+            
+            F13 = function(xx)
+            {
+                return (phyper(q = xx, m = ex13_m, n = ex13_n, k = ex13_k, lower.tail = TRUE))
+            }
+            
+            fctMasa <- ({
+                x = seq(1:ex13_k)
+                density <- fd13(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            fctRep <- ({
+                x = seq(1:ex13_k)
+                prob <- F13(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            fctProb <- ({
+                x = seq(1:ex13_k)
+                y = fd13(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") # , ylim = c(0,1))
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(lim_inf,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(a , b)
+                    y = fd13(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P13 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F13(a))
+                    }
+                    else
+                    {
+                        return (1 - F13 (a))
+                    }
+                }
+                else
+                {
+                    return (F13(b) - F13(a))
+                }
+            }
+            
+            SelectProb = "P(x>=a)"
+              
+            if(SelectProb=="P(x<=a)"){
+                valueProb <- c("Probability: ", P13(a))
+            }else if(SelectProb=="P(x>=b)"){
+                valueProb <- c("Probability: ", P13(b, param = 1))
+            }else{
+                valueProb <- c("Probability: ", P13(a, b))
+            }
+        
+
+
+```
+
