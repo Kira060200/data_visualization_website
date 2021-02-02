@@ -3,21 +3,22 @@ title: "Proiect"
 output: html_document
 ---
 
+### Ex1
+
+Presupunem ca avem un experiment aleator. Ne interesam la realizarea unui eveniment A, considerand ca sansa de realizare a lui A este p.
+Aruncam o moneda cu probabilitatea de p (prob).
+
 ```{r ex1}
           
-            # 1
-
-            a = 0
-            b = 1
             prob = 0.33
-            p = prob
+            a = 0
 
             FctMasa = function(p){
                 plot(c(1,0),c(p,1-p), lwd=5)
                 segments(c(1,0), 0, c(1,0), c(p,1-p), col="red")
             }
             
-            
+     
             F = function(x,p){
                 if (x<0){
                     y=0
@@ -48,31 +49,23 @@ output: html_document
                 }
             }
             
-            fctMasa <- ({FctMasa(prob)})
+            fctMasa <- ({
+                FctMasa(prob)
+            })
             
             
-            
-                
-            
+            fctRep <- ({
+                F2 = Vectorize(F, vectorize.args = "x")
+                t2 = seq(-1,2,length.out = 1000)
+                y2 = F2(t2,prob)
+                plot(t2, y2, type= "l", col="red")
+            })
             
             SelectProb = "P(x<=a)"
             
-            if(SelectProb=="P(x<=a)"){
-                valueProb <- c("Probability: ", P(prob, a))
-            }else if(SelectProb=="P(x>=b)"){
-                valueProb <- c("Probability: ", P(prob, b, param = 1)+F(b, prob))
-            }else{
-                valueProb <- c("Probability: ", P(prob, a, b)+F(a, prob))
-            }
-     
-            fctRep <- ({
-                F = Vectorize(F, vectorize.args = "x")
-                t = seq(-1,2,length.out = 1000)
-                y = F(t,prob)
-                plot(t, y, type= "l", col="red")
-            })
             
             fctProb <- ({
+                
                 F = Vectorize(F, vectorize.args = "x")
                 t = seq(-1,2,length.out = 1000)
                 y = F(t,prob)
@@ -81,7 +74,7 @@ output: html_document
                 if(SelectProb=="P(x<=a)"){
                     x = seq(0,a)
                     y=F(x, prob)
-                    #lines(x, y, col="blue")
+              
                     
                     for(i in 1:length(x)){
                         tmp = 0
@@ -91,7 +84,7 @@ output: html_document
                             tmp = y[i-1]
                         lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
                     }
-                    #polygon(c(0,x,a), c(0,y,0), col="light blue")
+  
                 }else if(SelectProb=="P(x>=b)"){
                     x = seq(b,2)
                     y = F(x,prob)
@@ -115,23 +108,32 @@ output: html_document
                         lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
                     }
                 }
-                
+            
             })
                 
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P(prob, a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P(prob, b, param = 1)+F(b, prob))
+            }else{
+                c("Probability: ", P(prob, a, b)+F(a, prob))
+            }
 
 ```
 ## R Markdown
 
+### Ex4
+
+Presupunem ca un jucator de baseball are probabilitatea p (prob2) de a nimeri mingea.
+Care este probabilitatea lui X <= 150 in n (NrAruncari) lovituri?
 
 
 ```{r ex4}
 
-            # 4
-
             prob2 = 0.33
             NrAruncari= 300
-            a = 0
-            b = 1
+            a = 100
+        
 
             fd4 = function(x)
             {
@@ -186,12 +188,14 @@ output: html_document
                 }
             }
             
+            
+            
             if(SelectProb=="P(x<=a)"){
-                valueProb <-c("Probability: ", P4(a))
+                c("Probability: ", P4(a))
             }else if(SelectProb=="P(x>=b)"){
-                valueProb <- c("Probability: ", P4(b, param = 1))
+                c("Probability: ", P4(b, param = 1))
             }else{
-                valueProb <- c("Probability: ", P4(a, b))
+                c("Probability: ", P4(a, b))
             }
         
 
@@ -200,14 +204,17 @@ output: html_document
 
 ## Including Plots
 
+### Ex 5
+
+Presupunem ca un medicament produce un efect secundar cu probabilitatea p (prob_infectare) . N (NrInfectati) pacienti primesc cate o doza.
+Care este probabilitatea ca nicio persoana sa experimenteze efect advers?
 
 ```{r ex5}
-            # 5
-            
+          
             NrInfectati = 1000
-            prob_infectare = 0.001
-            a = 0
-            b = 1
+            prob_infectare = 0.01
+            b = 7
+           
 
             fd5 = function(x)
             {
@@ -230,6 +237,8 @@ output: html_document
                 prob <- F5(x)
                 plot (x = x,y=prob,type="l")
             })
+            
+            SelectProb = "P(x>=b)"
             
             fctProb <- ({
                 x = 0:10
@@ -268,20 +277,22 @@ output: html_document
                 }
             }
             
-            SelectProb = "P(x<=a)" 
-            
+           
+                
             if(SelectProb=="P(x<=a)"){
-                valueProb <- c("Probability: ", P5(a))
+                c("Probability: ", P5(a))
             }else if(SelectProb=="P(x>=b)"){
-                valueProb <- c("Probability: ", P5(b, param = 1))
+                c("Probability: ", P5(b, param = 1))
             }else{
-                valueProb <- c("Probability: ", P5(a, b))
+                c("Probability: ", P5(a, b))
             }
-        
+            
 
 ```
 
+### Ex 8
 
+Care este probabilitatea sa avem intre A si B vanzari daca vanzarea medie saptamanala este de E (exp_sales) ?
 
 ```{r ex8}
 
@@ -289,8 +300,8 @@ output: html_document
 
             exp_sales = 3
             events = 10
-            a = 0
-            b = 1
+            
+            b = 4
             
             
             fd8 = function(x)
@@ -314,6 +325,8 @@ output: html_document
                 prob <- ppois(q = e2, lambda = exp_sales, lower.tail = TRUE)
                 plot (x = e2,y=prob,type="l")
             })
+            
+            SelectProb = "P(x>=b)"
             
             fctProb <- ({
                 x = 0:events
@@ -351,19 +364,23 @@ output: html_document
                 }
             }
             
-            SelectProb = "P(x>=b)"
+            
             
             if(SelectProb=="P(x<=a)"){
-                valueProb <- c("Probability: ", P8(a))
+                c("Probability: ", P8(a))
             }else if(SelectProb=="P(x>=b)"){
-                valueProb <- c("Probability: ", P8(b, param = 1))
+                c("Probability: ", P8(b, param = 1))
             }else{
-                valueProb <- c("Probability: ", P8(a, b))
+                c("Probability: ", P8(a, b))
             
             }
         
             
 ```
+
+### Ex 10 (Continua uniforma)
+
+Selectarea a N (nr_test) numere intre A (lim_inf) si B (lim_sup) ?
 
 ```{r ex10}
             
@@ -373,7 +390,7 @@ output: html_document
             lim_inf = 1
             lim_sup = 3
             
-            
+            a = 2
             
             fd10 = function(x)
             {
@@ -398,7 +415,7 @@ output: html_document
                 plot (x = x,y=prob,type="l")
             })
             
-            
+            SelectProb = "P(x<=a)"
             
             fctProb <-({
                 x = seq(lim_inf , lim_sup)
@@ -440,14 +457,14 @@ output: html_document
                 }
             }
             
-            SelectProb = "P(x<=a)"
+            
             
             if(SelectProb=="P(x<=a)"){
-                valueProb <- c("Probability: ", P10(a))
+                c("Probability: ", P10(a))
             }else if(SelectProb=="P(x>=b)"){
-                valueProb <- c("Probability: ", P10(b, param = 1))
+                c("Probability: ", P10(b, param = 1))
             }else{
-                valueProb <- c("Probability: ", P10(a, b))
+                c("Probability: ", P10(a, b))
                 
             }
     
@@ -456,15 +473,19 @@ output: html_document
 ```
 
 
+### Ex13
+
+Care e probabilitatea sa selectam x (ex13_x) bile rosii dintr-o multime cu k (ex13_k) extrase dintr-o urna care contine m (ex13_m) bile rosii si n (ex13_n) bile verzi? 
+
 ```{r ex13}
 
-            # 13
-
+       
             ex13_x = 14
             ex13_m = 70
-            ex13_n = 30
+            ex13_n = 84
             ex13_k = 20
 
+            a = 9
            
             fd13 = function(x)
             {
@@ -488,7 +509,7 @@ output: html_document
                 plot (x = x,y=prob,type="l")
             })
             
-            fctProb <- ({
+            fctProb <-({
                 x = seq(1:ex13_k)
                 y = fd13(x)
                 mini = min(y)
@@ -525,16 +546,15 @@ output: html_document
                 }
             }
             
-            SelectProb = "P(x>=a)"
-              
+            SelectProb = "P(x<=a)"
+            
             if(SelectProb=="P(x<=a)"){
-                valueProb <- c("Probability: ", P13(a))
+                c("Probability: ", P13(a))
             }else if(SelectProb=="P(x>=b)"){
-                valueProb <- c("Probability: ", P13(b, param = 1))
+                c("Probability: ", P13(b, param = 1))
             }else{
-                valueProb <- c("Probability: ", P13(a, b))
+                c("Probability: ", P13(a, b))
             }
-        
 
 
 ```
