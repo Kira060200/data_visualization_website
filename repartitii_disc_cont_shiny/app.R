@@ -1148,6 +1148,7 @@ server <- function(input, output, session) {
             
             
         }else if(input$tabs==11){
+            set.seed(5)
             #Weight density curve for women
             updateSliderInput(session = session, "a", min = 40, max = 80, value = 50)
             updateSliderInput(session = session, "b", min = 50, max = 90, value = 60)
@@ -1156,6 +1157,33 @@ server <- function(input, output, session) {
                 sex=factor(rep(c("F", "M"), each=400)),
                 weight=round(c(rnorm(400, mean=55, sd=5))
                 ))
+            
+            f11 = function(x){
+                return(dnorm(x=x, mean = 55, sd = 5))
+            }
+            
+            F11 = function(xx){
+                return(pnorm(q=xx, mean = 55, sd = 5))
+            }
+            
+            P11 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F11(a))
+                    }
+                    else
+                    {
+                        return (1 - F11(a))
+                    }
+                }
+                else
+                {
+                    return (F11(b) - F11(a))
+                }
+            }
             
             output$fctMasa <- renderPlot({
                 ggplot(df, aes(x=weight)) + geom_density()
@@ -1180,39 +1208,23 @@ server <- function(input, output, session) {
                         geom_line()+
                         geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
                         xlim(30, 80)
-                    
                 }
             })
             observeEvent(input$SelectProb, {
                 if(input$SelectProb=="P(x<=a)"){
                     output$valueProb <- renderText({
-                        cnt = 0
-                        for (i in 1:400) {
-                            if(df$weight[i] <= input$a)
-                                cnt = cnt+1
-                        }
-                        c("Probability: ", cnt/400)
+                        c("Probability: ", P11(input$a))
                     })
                 }else if(input$SelectProb=="P(x>=b)"){
                     output$valueProb <- renderText({
-                        cnt = 0
-                        for (i in 1:400) {
-                            if(df$weight[i] >= input$b)
-                                cnt = cnt+1
-                        }
-                        c("Probability: ", cnt/400)
+                        c("Probability: ", P11(input$b, param = 1))
                     })
                 }else{
                     output$valueProb <- renderText({
-                        cnt = 0
-                        for (i in 1:400) {
-                            if(df$weight[i] >= input$a & df$weight[i] <= input$b)
-                                cnt = cnt+1
-                        }
-                        c("Probability: ", cnt/400)
+                        c("Probability: ", P11(input$a, input$b))
                     })
                 }
-            })
+            })  
             
         }else if (input$tabs == 12){
             # 12 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1453,10 +1465,10 @@ server <- function(input, output, session) {
             }
             
             output$fctMasa <- renderPlot({
-                ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                    geom_line()+
-                    geom_area(mapping = aes(x = 0), fill = "red") +
-                    xlim(10, 350)
+                data %>%
+                    filter( price<300) %>%
+                    ggplot( aes(x=price)) +
+                    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
             })
             output$fctRep <- renderPlot({
                 ggplot(dat, aes(x=x)) + stat_ecdf(geom = "line")
@@ -1464,36 +1476,56 @@ server <- function(input, output, session) {
             output$fctProb <- renderPlot({
                 dat <- with(density(data$price), data.frame(x, y))
                 if(input$SelectProb=="P(x<=a)"){
-                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                        geom_line()+
-                        geom_area(mapping = aes(x = ifelse(x<=input$a, x, 0)), fill = "red") +
-                        xlim(10, 350)
+                    data %>%
+                        filter( price<=input$a) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                 }else if(input$SelectProb=="P(x>=b)"){
-                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                        geom_line()+
-                        geom_area(mapping = aes(x = ifelse(x>=input$b, x, 0)), fill = "red") +
-                        xlim(30, 400)
+                    data %>%
+                        filter( price>=input$b) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                 }else{
-                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                        geom_line()+
-                        geom_area(mapping = aes(x = ifelse(x>=input$a & x<=input$b, x, 0)), fill = "red") +
-                        xlim(10, 350)
+                    data %>%
+                        filter( price>=input$a & price <= input$b) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                     
                 }
             })
-            
+            F14 = function(xx){
+                return(pnorm(q=xx, mean = 90, sd = 50))
+            }
+            P14 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F14(a))
+                    }
+                    else
+                    {
+                        return (1 - F14 (a))
+                    }
+                }
+                else
+                {
+                    return (F14(b) - F14(a))
+                }
+            }
             observeEvent(input$SelectProb, {
                 if(input$SelectProb=="P(x<=a)"){
                     output$valueProb <- renderText({
-                        c("Probability: ", P(input$a))
+                        c("Probability: ", P14(input$a))
                     })
                 }else if(input$SelectProb=="P(x>=b)"){
                     output$valueProb <- renderText({
-                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                        c("Probability: ", P14(input$b, param = 1))
                     })
                 }else{
                     output$valueProb <- renderText({
-                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                        c("Probability: ", P14(input$a, input$b))
                     })
                 }
             })

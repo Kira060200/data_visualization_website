@@ -1,0 +1,345 @@
+---
+title: "Proiect"
+output: html_document
+---
+
+``` {r ex3}
+            lmb3 = 1
+            a = 0
+            b = 1
+            fd3 = function(x){
+                    return (lmb3*exp(-lmb3*x))
+            }
+            F3 = function(x){
+                return (integrate(fd3,lower = 0, upper = x)$value)
+            }
+            F3 = Vectorize(F3, vectorize.args = "x")
+            
+            x = seq(0.01, 50, length.out = 1000)
+            y = fd3(x)
+            plot(x, y, type= "l", col="red")
+           
+            x = seq(0.01, 50, length.out = 1000)
+            y = F3(x) 
+            plot(x, y, type= "l", col="red")
+            
+            
+            x = seq(0.01, 50, length.out = 1000)
+            y = fd3(x)
+                #mini = min(y)
+            plot(x, y, type= "l", col="red")
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                  x = seq(0.01,a,length.out = 1000)
+                  y = fd3(x)
+                  polygon(c(0, x, a), c(0,y,0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+                  x = seq(b,50,length.out = 1000)
+                  y = fd3(x)
+                  polygon(c(b, x), c(0, y), col="light blue")
+            }else{
+                  x = seq(a,b,length.out = 1000)
+                  y = fd3(x)
+                  polygon(c(a, x, b), c(0,y,0), col="light blue")
+                }
+  
+            P3 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F3(a))
+                    }
+                    else
+                    {
+                        return (1 - F3 (a))
+                    }
+                }
+                else
+                {
+                    return (F3(b) - F3(a))
+                }
+            }
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                    
+                    c("Probability: ", P3(a))
+                   
+                }else if(SelectProb=="P(x>=b)"){
+                    
+                    c("Probability: ", P3(b, param = 1))
+                    
+                }else{
+                    
+                    c("Probability: ", P3(a, b))
+                    
+                }
+            
+
+
+```
+
+
+
+```{r ex7}
+                Mean = 100
+                StDev = 15
+                a = 80
+                b = 120
+                fd7 = function(x){
+                    return (dnorm(x,  Mean, StDev))
+                }
+                F7 = function(x){
+                    # return (integrate(fd7,lower = -Inf, upper = x)$value)
+                    return (pnorm(x,  Mean, StDev))
+                }
+                F7 = Vectorize(F7, vectorize.args = "x")
+                x1 <- seq(-4, 4, length.out=100)* StDev +  Mean
+                
+                hx <- dnorm(x1,  Mean,  StDev)
+                plot(x1, hx, type = "n", xlab = "IQ Values", ylab = "")
+                lines(x1, hx)
+                
+
+                x2 = seq(-10, 10, length.out = 1000)
+                y = F7(x2)
+                plot(x2, y, type= "l", col="red")
+            
+                hx <- dnorm(x1,  Mean,  StDev)
+                plot(x1, hx, type = "n", xlab = "IQ Values", ylab = "")
+                
+                SelectProb = "P(x<=a)"
+                if( SelectProb=="P(x<=a)"){
+                    i <- x1 <=  a
+                    lines(x1, hx)
+                    polygon(c( a,x1[i]), c(0,hx[i]), col="red")
+                }else if( SelectProb=="P(x>=b)"){
+                    i <- x >=  b
+                    lines(x1, hx)
+                    polygon(c( b,x1[i]), c(0,hx[i]), col="red")
+                }else{
+                    i <- x1 >=  a & x1 <=  b
+                    lines(x1, hx)
+                    polygon(c( a,x1[i], b), c(0,hx[i],0), col="red")
+                        
+                    }
+                
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", pnorm( a,  Mean,  StDev))
+                    }else if( SelectProb=="P(x>=b)"){
+                        c("Probability: ", 1- pnorm( b,  Mean,  StDev))
+                    }else{
+                        c("Probability: ", pnorm( b,  Mean,  StDev) - pnorm( a,  Mean,  StDev))
+                    }
+```
+
+
+
+```{r ex9}
+            a = 2
+            b = 5
+            Time = 5
+            x <- seq(0, 12/(1/Time), 0.01) 
+            
+            y <- dexp(x, rate = 1/Time)
+            plot(x, y, type = "n", ylab = "f(x)")
+            lines(x,y)
+           
+            plot(x, pexp(x, 1/Time), type = "l",
+                ylab = "F(x)", lwd = 2, col = "red")
+        
+            y <- dexp(x, rate = 1/Time)
+            plot(x, y, type = "n", ylab = "")
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    lines(x, y)
+                    polygon(c(0,x[i],a), c(0,y[i],0), col="red")
+            }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    lines(x, y)
+                    polygon(c(b,x[i]), c(0,y[i]), col="red")
+                    
+                    #text(8, 0.12, format(pexp(10, rate = 0.2, lower.tail = FALSE),nsmall = 2), cex = 1.2)
+                }else{
+                    i <- x >= a & x <= b
+                    lines(x, y)
+                    polygon(c(a,x[i],b), c(0,y[i],0), col="red")
+                    
+                }
+ 
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", pexp(a, 1/Time))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", 1 - pexp(b, 1/Time))
+                }else{
+                        c("Probability: ", pexp(b, 1/Time) - pexp(a, 1/Time))
+                }
+```
+
+```{r ex11, warning=FALSE}
+            library(ggplot2)
+
+            b = 60            
+
+            df <- data.frame(
+                sex=factor(rep(c("F", "M"), each=400)),
+                weight=round(c(rnorm(400, mean=55, sd=5))
+                ))
+            
+            ggplot(df, aes(x=weight)) + geom_density()
+            
+            ggplot(df, aes(x=weight)) + stat_ecdf(geom = "line")
+            
+            dat <- with(density(df$weight), data.frame(x, y))
+            SelectProb = "P(x>=b)"
+            if(SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x<=a, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                }else if(SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=b, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=a & x<=b, x, 0)), fill = "red") +
+                        xlim(30, 80)
+                    
+                }
+                if(SelectProb=="P(x<=a)"){
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] <= a)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                }else if(SelectProb=="P(x>=b)"){
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] >= b)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                }else{
+                        cnt = 0
+                        for (i in 1:400) {
+                            if(df$weight[i] >= a & df$weight[i] <= b)
+                                cnt = cnt+1
+                        }
+                        c("Probability: ", cnt/400)
+                }
+  
+```
+
+```{r ex14, warning=FALSE}
+            library(ggplot2)
+            data <- read.table("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/1_OneNum.csv", header=TRUE)
+            
+            dat <- with(density(data$price), data.frame(x, y))
+
+            ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                    geom_line()+
+                    geom_area(mapping = aes(x = 0), fill = "red") +
+                    xlim(10, 350)
+  
+            ggplot(dat, aes(x=x)) + stat_ecdf(geom = "line")
+
+            dat <- with(density(data$price), data.frame(x, y))
+                if(SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x<=a, x, 0)), fill = "red") +
+                        xlim(10, 350)
+                }else if(SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=b, x, 0)), fill = "red") +
+                        xlim(30, 400)
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=a & x<=b, x, 0)), fill = "red") +
+                        xlim(10, 350)
+                    
+                }
+            
+            
+               # if(SelectProb=="P(x<=a)"){
+                #        c("Probability: ", P(a))
+                #}else if(SelectProb=="P(x>=b)"){
+                #        c("Probability: ", P(b, param = 1)+fm(b))
+                #}else{
+                #        c("Probability: ", P(a, b)+fm(a))
+                #}
+```
+
+```{r ex18}
+            meanlog = 1
+            sdlog = 0.25
+            f18 = function(x){
+                return(dlnorm(x=x, meanlog = meanlog, sdlog = sdlog, log = FALSE))
+            }
+            
+            F18 = function(xx){
+                return(plnorm(q=xx, meanlog = meanlog, sdlog = sdlog, log = FALSE))
+            }
+            
+            x = seq(0:15)
+            density <- f18(x)
+            plot (x = x,y=density,type="l")
+            
+            x = seq(0:15)
+            prob <- F18(x)
+            plot (x = x,y=prob,type="l")
+            
+            x = seq(0:15)
+            y = f18(x)
+            mini = min(y)
+            plot(x, y, type= "l", col="red") # , ylim = c(0,1))
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(lim_inf,x[i],a), c(0,y[i],0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],lim_sup), c(0,y[i],0), col="light blue")
+            }else{
+                    x = seq(a , b)
+                    y = f18(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            
+            P18 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F18(a))
+                    }
+                    else
+                    {
+                        return (1 - F18 (a))
+                    }
+                }
+                else
+                {
+                    return (F18(b) - F18(a))
+                }
+            }
+            
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P18(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P18(b, param = 1))
+                }else{
+                        c("Probability: ", P18(a, b))
+                }
+                  
+```
+
