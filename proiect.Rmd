@@ -2,7 +2,8 @@
 title: "Proiect"
 output: html_document
 ---
-
+###Ex 3
+Repartitia exponentiala in functie de un parametru lambda
 ``` {r ex3}
             lmb3 = 1
             a = 0
@@ -81,7 +82,8 @@ output: html_document
 ```
 
 
-
+###Ex 7 - Repartitie normala
+Se calculeaza probabilitatea ca IQ-ul unei persoane sa se afle intr-un interval [a,b], fiind date media si deviatia standard
 ```{r ex7}
                 Mean = 100
                 StDev = 15
@@ -135,7 +137,8 @@ output: html_document
 ```
 
 
-
+###Ex 9 - Repartitie exponentiala
+Se cunoaste timpul mediu pe care un utilizator il petrece pe un site si este calculata probabilitatea ca acesta sa petreaca un numar x de minute pe site.
 ```{r ex9}
             a = 2
             b = 5
@@ -178,23 +181,56 @@ output: html_document
                 }
 ```
 
+
+###Ex 11
+Se calculeaza probabilitatea ca o femeie sa aiba o anumita greutate, fiind generata o secventa de valori dupa o medie de 55 kg si o abatere de 5 kg.
 ```{r ex11, warning=FALSE}
             library(ggplot2)
 
             b = 60            
 
+            set.seed(5)
+            
             df <- data.frame(
                 sex=factor(rep(c("F", "M"), each=400)),
                 weight=round(c(rnorm(400, mean=55, sd=5))
                 ))
             
-            ggplot(df, aes(x=weight)) + geom_density()
+            f11 = function(x){
+                return(dnorm(x=x, mean = 55, sd = 5))
+            }
             
-            ggplot(df, aes(x=weight)) + stat_ecdf(geom = "line")
+            F11 = function(xx){
+                return(pnorm(q=xx, mean = 55, sd = 5))
+            }
             
-            dat <- with(density(df$weight), data.frame(x, y))
-            SelectProb = "P(x>=b)"
-            if(SelectProb=="P(x<=a)"){
+            P11 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F11(a))
+                    }
+                    else
+                    {
+                        return (1 - F11(a))
+                    }
+                }
+                else
+                {
+                    return (F11(b) - F11(a))
+                }
+            }
+            
+            
+                ggplot(df, aes(x=weight)) + geom_density()
+            
+                ggplot(df, aes(x=weight)) + stat_ecdf(geom = "line")
+            
+                dat <- with(density(df$weight), data.frame(x, y))
+                SelectProb = "P(x>=b)"
+                if(SelectProb=="P(x<=a)"){
                     ggplot(data = dat, mapping = aes(x = x, y = y)) +
                         geom_line()+
                         geom_area(mapping = aes(x = ifelse(x<=a, x, 0)), fill = "red") +
@@ -209,75 +245,94 @@ output: html_document
                         geom_line()+
                         geom_area(mapping = aes(x = ifelse(x>=a & x<=b, x, 0)), fill = "red") +
                         xlim(30, 80)
-                    
                 }
+            
                 if(SelectProb=="P(x<=a)"){
-                        cnt = 0
-                        for (i in 1:400) {
-                            if(df$weight[i] <= a)
-                                cnt = cnt+1
-                        }
-                        c("Probability: ", cnt/400)
+                        c("Probability: ", P11(a))
+                    
                 }else if(SelectProb=="P(x>=b)"){
-                        cnt = 0
-                        for (i in 1:400) {
-                            if(df$weight[i] >= b)
-                                cnt = cnt+1
-                        }
-                        c("Probability: ", cnt/400)
+                        c("Probability: ", P11(b, param = 1))
                 }else{
-                        cnt = 0
-                        for (i in 1:400) {
-                            if(df$weight[i] >= a & df$weight[i] <= b)
-                                cnt = cnt+1
-                        }
-                        c("Probability: ", cnt/400)
-                }
+                        c("Probability: ", P11(a, b))
+                } 
   
 ```
 
+
+###Ex 14
+Fiind dat pretul pe noapte al unor apartamente dintr-un oras, se calculeaza probabilitatea ca pretul unei camere sa fie intr-un anumit interval.
 ```{r ex14, warning=FALSE}
             library(ggplot2)
+            library(dplyr)
+            b = 80
             data <- read.table("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/1_OneNum.csv", header=TRUE)
             
             dat <- with(density(data$price), data.frame(x, y))
-
-            ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                    geom_line()+
-                    geom_area(mapping = aes(x = 0), fill = "red") +
-                    xlim(10, 350)
-  
-            ggplot(dat, aes(x=x)) + stat_ecdf(geom = "line")
-
-            dat <- with(density(data$price), data.frame(x, y))
+            
+            f14 = function(datt){
+                return(datt)
+            }
+                data %>%
+                    filter( price<300) %>%
+                    ggplot( aes(x=price)) +
+                    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
+                
+                ggplot(dat, aes(x=x)) + stat_ecdf(geom = "line")
+            
+                dat <- with(density(data$price), data.frame(x, y))
+                SelectProb = "P(x>=b)"
                 if(SelectProb=="P(x<=a)"){
-                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                        geom_line()+
-                        geom_area(mapping = aes(x = ifelse(x<=a, x, 0)), fill = "red") +
-                        xlim(10, 350)
+                    data %>%
+                        filter( price<=a) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                 }else if(SelectProb=="P(x>=b)"){
-                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                        geom_line()+
-                        geom_area(mapping = aes(x = ifelse(x>=b, x, 0)), fill = "red") +
-                        xlim(30, 400)
+                    data %>%
+                        filter( price>=b & price < 600) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                 }else{
-                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
-                        geom_line()+
-                        geom_area(mapping = aes(x = ifelse(x>=a & x<=b, x, 0)), fill = "red") +
-                        xlim(10, 350)
+                    data %>%
+                        filter( price>=a & price <= b) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                     
                 }
             
+            F14 = function(xx){
+                return(pnorm(q=xx, mean = 90, sd = 50))
+            }
+            P14 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F14(a))
+                    }
+                    else
+                    {
+                        return (1 - F14 (a))
+                    }
+                }
+                else
+                {
+                    return (F14(b) - F14(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P14(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P14(b, param = 1))
+                }else{
+                        c("Probability: ", P14(a, b))
+                }
             
-               # if(SelectProb=="P(x<=a)"){
-                #        c("Probability: ", P(a))
-                #}else if(SelectProb=="P(x>=b)"){
-                #        c("Probability: ", P(b, param = 1)+fm(b))
-                #}else{
-                #        c("Probability: ", P(a, b)+fm(a))
-                #}
 ```
 
+
+###Ex 18
+Aplicatie a repartitiei log-normale ce calculeaza probabilitatea in functie de medie si deviatia standard
 ```{r ex18}
             meanlog = 1
             sdlog = 0.25

@@ -10,6 +10,7 @@
 library(shiny)
 library(markdown)
 library(ggplot2)
+library(dplyr)
 
 
 
@@ -1482,7 +1483,7 @@ server <- function(input, output, session) {
                         geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                 }else if(input$SelectProb=="P(x>=b)"){
                     data %>%
-                        filter( price>=input$b) %>%
+                        filter( price>=input$b & price <600) %>%
                         ggplot( aes(x=price)) +
                         geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)
                 }else{
