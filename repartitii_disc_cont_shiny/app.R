@@ -1692,12 +1692,11 @@ server <- function(input, output, session) {
                     }
                     #plot(x, y, lwd=5, ylim = c(0,1))
                     #x = seq(input$r, input$a)
-                    print(y)
                     segments(x, 0, x, y, col="blue")
                 }else if(input$SelectProb=="P(x>=b)"){
                     x = seq(input$b, input$k3, by=1)
                     y=fm(input$b)
-                    for(i in input$b+1:input$k3){
+                    for(i in (input$b+1):input$k3){
                         y = c(y,fm(i))
                     }
                     #plot(x, y, lwd=5, ylim = c(0,1))
@@ -1706,7 +1705,7 @@ server <- function(input, output, session) {
                 }else{
                     x = seq(input$a, input$b, by=1)
                     y=fm(input$a)
-                    for(i in input$a+1:input$b){
+                    for(i in (input$a+1):input$b){
                         y = c(y,fm(i))
                     }
                     #plot(x, y, lwd=5, ylim = c(0,1))

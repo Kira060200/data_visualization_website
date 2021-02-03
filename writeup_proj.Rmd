@@ -506,7 +506,7 @@ Modelam numarul de aruncari ale unei monede cu probabilitate *pr2* pana obtinem 
                 }else if(SelectProb=="P(x>=b)"){
                     x = seq(b, k3, by=1)
                     y=fm(b)
-                    for(i in b+1:k3){
+                    for(i in (b+1):k3){
                         y = c(y,fm(i))
                     }
                     #plot(x, y, lwd=5, ylim = c(0,1))
@@ -515,7 +515,7 @@ Modelam numarul de aruncari ale unei monede cu probabilitate *pr2* pana obtinem 
                 }else{
                     x = seq(a, b, by=1)
                     y=fm(a)
-                    for(i in a+1:b){
+                    for(i in (a+1):b){
                         y = c(y,fm(i))
                     }
                     #plot(x, y, lwd=5, ylim = c(0,1))
