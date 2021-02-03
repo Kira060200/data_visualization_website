@@ -398,3 +398,73 @@ Aplicatie a repartitiei log-normale ce calculeaza probabilitatea in functie de m
                   
 ```
 
+<<<<<<< Updated upstream
+=======
+###Ex 20
+In medie, o persoana trimite un mandat postal o data la un numar theta de minute. Care este probabilitatea ca acea persoana sa trimita un numar alpha de mandate postale intr-o anumita perioada de timp?
+```{r}
+      alpha = 10
+      theta = 15
+      
+            f20 = function(x){
+                return(dgamma(x = x, shape = alpha, scale = theta))
+            }
+            F20 = function(xx){
+                return(pgamma(q = xx, shape = alpha, scale = theta))
+            }
+            
+                x = seq(0:700)
+                density <- f20(x)
+                plot (x = x,y=density,type="l")
+            
+                x = seq(0:700)
+                prob <- F20(x)
+                plot (x = x,y=prob,type="l")
+            
+                x = seq(0:700)
+                y = f20(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") 
+                SelectProb = "P(x>=b)"
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(0,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(a , b)
+                    y = f20(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            
+            P20 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F20(a))
+                    }
+                    else
+                    {
+                        return (1 - F20(a))
+                    }
+                }
+                else
+                {
+                    return (F20(b) - F20(a))
+                }
+            }
+            
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P20(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P20(b, param = 1))
+                }else{
+                        c("Probability: ", P20(a, b))
+                }
+        
+```
+
+>>>>>>> Stashed changes
