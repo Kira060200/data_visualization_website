@@ -549,4 +549,95 @@ Modelam numarul de aruncari ale unei monede cu probabilitate *pr2* pana obtinem 
                         c("Probability: ", P(a, b)+fm(a))
                 }
 ```
+### Ex 19 (aproximarea binomiala prin Poisson)
+Ilustram aproximarea binomiala prin Poisson data de numarul *n* si probabilitatea *p*
+```{r ex19}
+            # 19 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # Aproximarea binomiala prin Poisson
+            a = 8
+            b = 12
+            n = 40
+            pr3 = 0.33
+            
+            SelectProb="P(a<=x<=b)"
+            fm = function(x){
+                return(dpois(x, lambda = lmb))
+            }
+            lmb = n*pr3
+            fm = function(x){
+                return(dpois(x, lambda = lmb))
+            }
+            F = function(x){
+                return(ppois(x, lambda = lmb))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, n, by=1)
+                y=fm(0)
+                for(i in 1:n){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            # fct rep
+                x = seq(-1, n, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red")
+            
+                x = seq(0, n, by=1)
+                y=fm(0)
+                for(i in 1:n){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, n, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+            
+
+```
 
