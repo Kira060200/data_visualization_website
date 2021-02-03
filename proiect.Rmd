@@ -1,0 +1,1806 @@
+---
+title: "Raport ilustrare repartitii discrete si continue"
+output: html_document
+author: "Constantin Gabriel-Adrian, Hernest Mihai, Richiteanu Mihai-Sebastian | Grupa 242"
+---
+<style type="text/css">
+    h1.title {
+      text-align: center;
+    }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Ce sunt  *variabilele aleatoare*?
+Variabila aleatoare este constituita de conceptul de a asocia o valoare numerica reala unui eveniment elementar. 
+
+Astfel, o variabila aleatoare nu este altceva decat o functie reala $x:\Omega\rightarrow\mathbb{R}$ care are proprietatea ca $\{\omega \,|\, X(\omega)\leq x\} \in {F}, \forall \,x \in \mathbb{R}$ , unde $(\Omega, F, \mathbb{P})$ un camp de probabilitate.
+
+### Tipuri de *variabile aleatoare* :
+Putem distinge 2 tipuri de variabile aleatoare:
+
+ - discrete (cel mult numarabile)
+ - continue (atunci cand intr-un experiment masuram o anumita cantitate)
+
+### Cateva notiuni elementare despre repartitii, functia de masa/de densitate, functia de repartitie
+ - repartitia
+  $$\mathbb{P}_{X}(A) = \mathbb{P}(X \in A), \forall A \in \mathbb{R} $$
+1. *variabile aleatoare*
+    - repartitia
+  $$\mathbb{P} (x \in A) = \sum_{x \in A \cap X(\Omega)}{p_{x}(x)}$$
+    - functia de masa
+  $$p_{x} (x) = \mathbb{P}(X=x), \forall x \in \mathbb{R}$$
+    - functia de repartitie
+  $$F(x) = \mathbb{P}(X \leq x), \forall x \in \mathbb{R}$$
+  
+2. *variabile continue*
+    - repartitia
+  $$\mathbb{P}(x \in A) = \int _{A}{f(x)dx}, \forall A \subseteq \mathbb{R}$$
+    - functia de densitate
+  $$f(x), \, \text{unde } f(x) \geq 0$$
+    - functia de repartitie
+  $$F(x)=\mathbb{P} (X \leq x), \, \forall x \in \mathbb{R}$$
+
+### Cum a decurs implementarea in *R* cu libraria *Shiny*?
+Am folosit libraria *Shiny* pentru a realiza o pagina web in care sa afisam toate figurile. Astfel, pentru o navigare facila am implementat fiecare figura in propriul *tab panel*, usor navigabila din partea de sus a ferestrei.
+
+Fiecare tab are o parte comuna si una personalizata. Luand in considerare faptul ca pentru fiecare repartitie am ilustrat probabilitati de tipul $\mathbb{P}(a \leq X)$, $\mathbb{P}(X \geq b)$ si $\mathbb{P}(a \leq X \leq b)$, am implementat in zona comuna aceasta alegere, *slidere* pentru *a* si *b*, care se actualizeaza dinamic in functie de constrangerile fiecarei repartitii.
+
+In partea personalizata vom regasi slidere custom (de exemplu pentru lambda, probabilitate) precum si 3 figuri(grafice): functia de masa/densitate, functia de repartitie si ilustrarea prin hasurare a probabilitatii selectate de utilizator.
+
+Functiile de masa/densitate si de repartitie au fost calculate folosind functiile predefinite(de exemplu pentru repartitia binomiala avem *dbinom* si *pbinom*):
+```
+            fm = function(x){
+                return (dbinom(x, size = NrIncercari, prob = ProbBit))
+            }
+            F = function(x){
+                return (pbinom(x, size = NrIncercari, prob = ProbBit))
+            }
+```
+
+
+Pentru realizarea figurilor am folosit atat *plot* cat si *ggplot* (libraria ggplot2), de exemplu:
+```
+            # fct masa
+                x = seq(0, NrBiti, by=1)
+                y = fm(x)
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            # fct rept
+                x = seq(-1, NrBiti, length.out = 1000)
+                y = F(x) 
+                plot(x, y, type= "l", col="red")
+```
+Hasurarea probabilitatii a fost realizata cu ajutorul functiei *ploygon*
+```
+            if(SelectProb=="P(x<=a)"){
+              x = seq(-10,a,length.out = 1000)
+              y = fd2(x)
+              polygon(c(-10,x,a), c(-10,y,0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+              x = seq(b,10,length.out = 1000)
+              y = fd2(x)
+              polygon(c(b,x,10), c(0,y,0), col="light blue")
+            }else{
+              x = seq(a,b,length.out = 1000)
+              y = fd2(x)
+              polygon(c(a,x,b), c(0,y,0), col="light blue")
+            }
+```
+
+### Codul complet si figurile:
+Pentru o experienta completa (UI-interactiv, slidere care se actualizeaza automat) se recomanda utilizarea aplicatiei .R atasata.
+
+### Ex1
+
+Presupunem ca avem un experiment aleator. Ne interesam la realizarea unui eveniment A, considerand ca sansa de realizare a lui A este p.
+Aruncam o moneda cu probabilitatea de p (prob).
+
+```{r ex1}
+          
+            prob = 0.33
+            a = 0
+            FctMasa = function(p){
+                plot(c(1,0),c(p,1-p), lwd=5, main="Functie de masa")
+                segments(c(1,0), 0, c(1,0), c(p,1-p), col="red")
+            }
+            
+     
+            F = function(x,p){
+                if (x<0){
+                    y=0
+                }else if (x<1){
+                    y = 1-p
+                }else{
+                    y=1
+                }
+                return(y)
+            }
+            
+            P = function(p, a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a, p))
+                    }
+                    else
+                    {
+                        return (1 - F(a, p))
+                    }
+                }
+                else
+                {
+                    return (F(b, p) - F(a, p))
+                }
+            }
+            
+            fctMasa <- ({
+                FctMasa(prob)
+            })
+            
+            
+            fctRep <- ({
+                F2 = Vectorize(F, vectorize.args = "x")
+                t2 = seq(-1,2,length.out = 1000)
+                y2 = F2(t2,prob)
+                plot(t2, y2, type= "l", col="red", main="Functie de repartitie")
+            })
+            
+            SelectProb = "P(x<=a)"
+            
+            
+            fctProb <- ({
+                
+                F = Vectorize(F, vectorize.args = "x")
+                t = seq(-1,2,length.out = 1000)
+                y = F(t,prob)
+                plot(t, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+                
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0,a)
+                    y=F(x, prob)
+              
+                    
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+  
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b,2)
+                    y = F(x,prob)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }else{
+                    x = seq(a,b)
+                    y = F(x,prob)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }
+            
+            })
+                
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P(prob, a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P(prob, b, param = 1)+F(b, prob))
+            }else{
+                c("Probability: ", P(prob, a, b)+F(a, prob))
+            }
+```
+
+### Ex 2
+
+Modelam repartitia data de o v.a continua cu formula $$f = (e^x) / ((1+e^x)^2)$$
+```{r ex2}
+fd2 = function(x){
+         return (exp(x)/(1 + exp(x))^2)
+}
+F2 = function(x){
+      return (integrate(fd2,lower = -Inf, upper = x)$value)
+}
+F2 = Vectorize(F2, vectorize.args = "x")
+a=0
+b=1
+# fct masa
+x = seq(-10, 10, length.out = 1000)
+y = fd2(x)
+# fct repartitie
+plot(x, y, type= "l", col="red", main="Functie de densitate")
+x = seq(-10, 10, length.out = 1000)
+y = F2(x) 
+
+plot(x, y, type= "l", col="red", main="Functie de repartitie")
+x = seq(-10, 10, length.out = 1000)
+y = fd2(x) 
+
+plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+SelectProb = "P(x<=a)"            
+if(SelectProb=="P(x<=a)"){
+  x = seq(-10,a,length.out = 1000)
+  y = fd2(x)
+  polygon(c(-10,x,a), c(-10,y,0), col="light blue")
+}else if(SelectProb=="P(x>=b)"){
+  x = seq(b,10,length.out = 1000)
+  y = fd2(x)
+  polygon(c(b,x,10), c(0,y,0), col="light blue")
+}else{
+  x = seq(a,b,length.out = 1000)
+  y = fd2(x)
+  polygon(c(a,x,b), c(0,y,0), col="light blue")
+}
+  P2 = function(a, b=NULL, param=NULL)
+  {
+    if(is.null(b))
+    {
+       if(is.null(param))
+       {
+          return(F2(a))
+       }
+       else
+       {
+          return (1 - F2(a))
+       }
+    }
+    else
+    {
+          return (F2(b) - F2(a))
+    }
+}
+
+
+if(SelectProb=="P(x<=a)"){
+  c("Probability: ", P2(a))
+}else if(SelectProb=="P(x>=b)"){
+  c("Probability: ", P2(b, param = 1))
+}else{
+  c("Probability: ", P2( a, b))
+}
+            
+```
+
+### Ex 3
+
+Repartitia exponentiala in functie de un parametru lambda
+``` {r ex3}
+            lmb3 = 1
+            a = 0
+            b = 1
+            fd3 = function(x){
+                    return (lmb3*exp(-lmb3*x))
+            }
+            F3 = function(x){
+                return (integrate(fd3,lower = 0, upper = x)$value)
+            }
+            F3 = Vectorize(F3, vectorize.args = "x")
+            
+            x = seq(0.01, 50, length.out = 1000)
+            y = fd3(x)
+            plot(x, y, type= "l", col="red", main="Functie de densitate")
+           
+            x = seq(0.01, 50, length.out = 1000)
+            y = F3(x) 
+            plot(x, y, type= "l", col="red", main="Functie de repartitie")
+            
+            
+            x = seq(0.01, 50, length.out = 1000)
+            y = fd3(x)
+                #mini = min(y)
+            plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                  x = seq(0.01,a,length.out = 1000)
+                  y = fd3(x)
+                  polygon(c(0, x, a), c(0,y,0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+                  x = seq(b,50,length.out = 1000)
+                  y = fd3(x)
+                  polygon(c(b, x), c(0, y), col="light blue")
+            }else{
+                  x = seq(a,b,length.out = 1000)
+                  y = fd3(x)
+                  polygon(c(a, x, b), c(0,y,0), col="light blue")
+                }
+  
+            P3 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F3(a))
+                    }
+                    else
+                    {
+                        return (1 - F3 (a))
+                    }
+                }
+                else
+                {
+                    return (F3(b) - F3(a))
+                }
+            }
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                    
+                    c("Probability: ", P3(a))
+                   
+                }else if(SelectProb=="P(x>=b)"){
+                    
+                    c("Probability: ", P3(b, param = 1))
+                    
+                }else{
+                    
+                    c("Probability: ", P3(a, b))
+                    
+                }
+            
+```
+
+### Ex4
+
+Presupunem ca un jucator de baseball are probabilitatea p (prob2) de a nimeri mingea.
+Care este probabilitatea lui X <= 150 in n (NrAruncari) lovituri?
+
+
+```{r ex4}
+            prob2 = 0.33
+            NrAruncari= 300
+            a = 100
+        
+            fd4 = function(x)
+            {
+                return(dpois(x, prob2*NrAruncari , log = FALSE))
+            }
+            
+            F4 = function(xx)
+            {
+                return (ppois(q = xx, lambda = NrAruncari*prob2, lower.tail = TRUE))
+            }
+            
+            hits <- 0:NrAruncari 
+            density <- fd4(hits)
+            plot (x = hits,y=density,type="l", main="Functie de densitate")
+         
+            prob <- F4(hits)
+            plot (x = hits,y=prob,type="l", main="Functie de repartitie")
+          
+            x = 0:NrAruncari
+            y = fd4(x)
+            plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+                
+            SelectProb = "P(x<=a)"
+                
+            if(SelectProb=="P(x<=a)"){
+                 polygon(c(0,x[x<=a],a), c(0,y[x<=a],0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+                polygon(c(b,x[b<=x],NrAruncari),c(0,y[b<=x],0), col="light blue")
+            }else{
+                x = seq(a,b)
+                y = fd4(x)
+                polygon(c(a,x,b), c(0,y,0), col="light blue")
+            }
+         
+          
+            P4 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F4(a))
+                    }
+                    else
+                    {
+                        return (1 - F4 (a))
+                    }
+                }
+                else
+                {
+                    return (F4(b) - F4(a))
+                }
+            }
+            
+            
+            
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P4(a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P4(b, param = 1))
+            }else{
+                c("Probability: ", P4(a, b))
+            }
+        
+```
+
+
+### Ex 5
+
+Presupunem ca un medicament produce un efect secundar cu probabilitatea p (prob_infectare) . N (NrInfectati) pacienti primesc cate o doza.
+Care este probabilitatea ca nicio persoana sa experimenteze efect advers?
+
+```{r ex5}
+          
+            NrInfectati = 1000
+            prob_infectare = 0.01
+            b = 7
+           
+            fd5 = function(x)
+            {
+                return(dpois(x = x, lambda = NrInfectati * prob_infectare))
+            }
+            
+            F5 = function(xx)
+            {
+                return (ppois(q = xx, lambda = NrInfectati * prob_infectare, lower.tail = TRUE))
+            }
+            
+            fctMasa <- ({
+                x <- 0:10
+                density <- fd5(x)
+                plot (x = x,y=density,type="l", main="Functie de densitate")
+            })
+            
+            fctRep <- ({
+                x <- 0:10
+                prob <- F5(x)
+                plot (x = x,y=prob,type="l", main="Functie de repartitie")
+            })
+            
+            SelectProb = "P(x>=b)"
+            
+            fctProb <- ({
+                x = 0:10
+                y = fd5(x)
+                
+                plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+                
+                if(SelectProb=="P(x<=a)"){
+                    polygon(c(0,x[x<=a],a), c(0,y[x<=a],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    polygon(c(b,x[b<=x],NrInfectati),c(0,y[b<=x],0), col="light blue")
+                }else{
+                    x = seq(a,b)
+                    y = fd5(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                    
+                }
+            })
+            
+            P5 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F5(a))
+                    }
+                    else
+                    {
+                        return (1 - F5 (a))
+                    }
+                }
+                else
+                {
+                    return (F5(b) - F5(a))
+                }
+            }
+            
+           
+                
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P5(a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P5(b, param = 1))
+            }else{
+                c("Probability: ", P5(a, b))
+            }
+            
+```
+
+### Ex 6 (Repartitie binomiala pentru v.a. discreta)
+Fie un bit care este transmis pe un canal bruiat si are probabilitatea *p* sa fie transmis incorect.
+Pentru a imbunatati fiabilitatea comunicarii, este transmis de *n* ori, unde *n* impar
+Presupunem ca avem un decodor care decide care bit e corect dupa numarul majoritar de biti transmisi.
+*n* si *p* dati ca parametru, *x*-nr biti transmisi cu eroare, *X~B(n, p)*
+```{r ex6}
+
+            # 6 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            
+            ProbBit = 0.1
+            NrIncercari = 15
+            NrBiti = 10
+            
+            a = 2
+            b = 4
+
+            fm = function(x){
+                return (dbinom(x, size = NrIncercari, prob = ProbBit))
+            }
+            F = function(x){
+                return (pbinom(x, size = NrIncercari, prob = ProbBit))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, NrBiti, by=1)
+                y = fm(x)
+                plot(x, y, lwd=5, main="Functie de masa")
+                segments(x, 0, x, y, col="red")
+            # fct rept
+                x = seq(-1, NrBiti, length.out = 1000)
+                y = F(x) 
+                plot(x, y, type= "l", col="red", main="Functie de repartitie")
+            
+                x = seq(0, NrBiti, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+                
+                SelectProb = "P(x<=a)"
+                
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a)
+                    y = F(x)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, NrBiti)
+                    y = F(x)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }else{
+                    x = seq(a, b)
+                    y = F(x)
+                    for(i in 1:length(x)){
+                        tmp = 0
+                        if(i==1)
+                            tmp = 0
+                        else
+                            tmp = y[i-1]
+                        lines(c(x[i],x[i]), c(tmp,y[i]), col="blue")
+                    }
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex 7 - Repartitie normala
+Se calculeaza probabilitatea ca IQ-ul unei persoane sa se afle intr-un interval [a,b], fiind date media si deviatia standard
+```{r ex7}
+                Mean = 100
+                StDev = 15
+                a = 80
+                b = 120
+                fd7 = function(x){
+                    return (dnorm(x,  Mean, StDev))
+                }
+                F7 = function(x){
+                    # return (integrate(fd7,lower = -Inf, upper = x)$value)
+                    return (pnorm(x,  Mean, StDev))
+                }
+                F7 = Vectorize(F7, vectorize.args = "x")
+                x1 <- seq(-4, 4, length.out=100)* StDev +  Mean
+                
+                hx <- dnorm(x1,  Mean,  StDev)
+                plot(x1, hx, type = "n", xlab = "IQ Values", ylab = "", main="Functie de densitate")
+                lines(x1, hx)
+                
+                x2 = seq(-10, 10, length.out = 1000)
+                y = F7(x2)
+                plot(x2, y, type= "l", col="red", main="Functie de repartitie")
+            
+                hx <- dnorm(x1,  Mean,  StDev)
+                plot(x1, hx, type = "n", xlab = "IQ Values", ylab = "", main="Ilustrarea probabilitatii")
+                
+                SelectProb = "P(x<=a)"
+                if( SelectProb=="P(x<=a)"){
+                    i <- x1 <=  a
+                    lines(x1, hx)
+                    polygon(c( a,x1[i]), c(0,hx[i]), col="red")
+                }else if( SelectProb=="P(x>=b)"){
+                    i <- x >=  b
+                    lines(x1, hx)
+                    polygon(c( b,x1[i]), c(0,hx[i]), col="red")
+                }else{
+                    i <- x1 >=  a & x1 <=  b
+                    lines(x1, hx)
+                    polygon(c( a,x1[i], b), c(0,hx[i],0), col="red")
+                        
+                    }
+                
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", pnorm( a,  Mean,  StDev))
+                    }else if( SelectProb=="P(x>=b)"){
+                        c("Probability: ", 1- pnorm( b,  Mean,  StDev))
+                    }else{
+                        c("Probability: ", pnorm( b,  Mean,  StDev) - pnorm( a,  Mean,  StDev))
+                    }
+```
+
+### Ex 8
+
+Care este probabilitatea sa avem intre A si B vanzari daca vanzarea medie saptamanala este de E (exp_sales) ?
+
+```{r ex8}
+            # 8
+            exp_sales = 3
+            events = 10
+            
+            b = 4
+            
+            
+            fd8 = function(x)
+            {
+                return(dpois(x = x, lambda = exp_sales))
+            }
+            
+            F8 = function(xx)
+            {
+                return (ppois(q = xx, lambda = exp_sales, lower.tail = TRUE))
+            }
+            
+            fctMasa <- ({
+                ee = 0:events
+                density <- fd8(ee)
+                plot (x = ee,y=density,type="l", main="Functie de densitate")
+            })
+            
+            fctRep <- ({
+                e2 = 0:events
+                prob <- ppois(q = e2, lambda = exp_sales, lower.tail = TRUE)
+                plot (x = e2,y=prob,type="l", main="Functie de repartitie")
+            })
+            
+            SelectProb = "P(x>=b)"
+            
+            fctProb <- ({
+                x = 0:events
+                y = fd8(x)
+                
+                plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii")
+                
+                if(SelectProb=="P(x<=a)"){
+                    polygon(c(0,x[x<=a],a), c(0,y[x<=a],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    polygon(c(b,x[b<=x],NrInfectati),c(0,y[b<=x],0), col="light blue")
+                }else{
+                    x = seq(a,b)
+                    y = fd8(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P8 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F8(a))
+                    }
+                    else
+                    {
+                        return (1 - F8 (a))
+                    }
+                }
+                else
+                {
+                    return (F8(b) - F8(a))
+                }
+            }
+            
+            
+            
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P8(a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P8(b, param = 1))
+            }else{
+                c("Probability: ", P8(a, b))
+            
+            }
+        
+            
+```
+
+### Ex 9 - Repartitie exponentiala
+Se cunoaste timpul mediu pe care un utilizator il petrece pe un site si este calculata probabilitatea ca acesta sa petreaca un numar x de minute pe site.
+```{r ex9}
+            a = 2
+            b = 5
+            Time = 5
+            x <- seq(0, 12/(1/Time), 0.01) 
+            
+            y <- dexp(x, rate = 1/Time)
+            plot(x, y, type = "n", ylab = "f(x)", main="Functie de densitate")
+            lines(x,y)
+           
+            plot(x, pexp(x, 1/Time), type = "l",
+                ylab = "F(x)", lwd = 2, col = "red", main="Functie de repartitie")
+        
+            y <- dexp(x, rate = 1/Time)
+            plot(x, y, type = "n", ylab = "", main="Ilustrarea probabilitatii")
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    lines(x, y)
+                    polygon(c(0,x[i],a), c(0,y[i],0), col="red")
+            }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    lines(x, y)
+                    polygon(c(b,x[i]), c(0,y[i]), col="red")
+                    
+                    #text(8, 0.12, format(pexp(10, rate = 0.2, lower.tail = FALSE),nsmall = 2), cex = 1.2)
+                }else{
+                    i <- x >= a & x <= b
+                    lines(x, y)
+                    polygon(c(a,x[i],b), c(0,y[i],0), col="red")
+                    
+                }
+ 
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", pexp(a, 1/Time))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", 1 - pexp(b, 1/Time))
+                }else{
+                        c("Probability: ", pexp(b, 1/Time) - pexp(a, 1/Time))
+                }
+```
+
+### Ex 10 (Continua uniforma)
+
+Selectarea a N (nr_test) numere intre A (lim_inf) si B (lim_sup) ?
+
+```{r ex10}
+            
+            # 10
+            nr_test = 10
+            lim_inf = 1
+            lim_sup = 3
+            
+            a = 2
+            
+            fd10 = function(x)
+            {
+                return(dunif(x = x, min=lim_inf,max=lim_sup))
+            }
+            
+            F10 = function(xx)
+            {
+                return (punif(q = xx, min=lim_inf,max=lim_sup, lower.tail = TRUE))
+            }
+            
+            
+            fctMasa <- ({
+                x = runif(nr_test, min = lim_inf, max = lim_sup)
+                density <- fd10(x)
+                plot (x = x,y=density,type="l", main="Functie de densitate")
+            })
+            
+            fctRep <- ({
+                x = runif(nr_test, min = lim_inf, max = lim_sup)
+                prob <- F10(x)
+                plot (x = x,y=prob,type="l", main="Functie de repartitie")
+            })
+            
+            SelectProb = "P(x<=a)"
+            
+            fctProb <-({
+                x = seq(lim_inf , lim_sup)
+                y = fd10(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red", ylim = c(0,1), main="Ilustrarea probabilitatii")
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(lim_inf,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    
+                    x = seq(a , b)
+                    y = fd10(x)
+                    
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            
+            P10 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F10(a))
+                    }
+                    else
+                    {
+                        return (1 - F10 (a))
+                    }
+                }
+                else
+                {
+                    return (F10(b) - F10(a))
+                }
+            }
+            
+            
+            
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P10(a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P10(b, param = 1))
+            }else{
+                c("Probability: ", P10(a, b))
+                
+            }
+    
+```
+
+### Ex 11
+Se calculeaza probabilitatea ca o femeie sa aiba o anumita greutate, fiind generata o secventa de valori dupa o medie de 55 kg si o abatere de 5 kg.
+```{r ex11, warning=FALSE}
+            library(ggplot2)
+            b = 60            
+            set.seed(5)
+            
+            df <- data.frame(
+                sex=factor(rep(c("F", "M"), each=400)),
+                weight=round(c(rnorm(400, mean=55, sd=5))
+                ))
+            
+            f11 = function(x){
+                return(dnorm(x=x, mean = 55, sd = 5))
+            }
+            
+            F11 = function(xx){
+                return(pnorm(q=xx, mean = 55, sd = 5))
+            }
+            
+            P11 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F11(a))
+                    }
+                    else
+                    {
+                        return (1 - F11(a))
+                    }
+                }
+                else
+                {
+                    return (F11(b) - F11(a))
+                }
+            }
+            
+            
+                ggplot(df, aes(x=weight)) + geom_density() + ggtitle("Functie de densitate")
+            
+                ggplot(df, aes(x=weight)) + stat_ecdf(geom = "line") + ggtitle("Functie de repartitie")
+            
+                dat <- with(density(df$weight), data.frame(x, y))
+                SelectProb = "P(x>=b)"
+                if(SelectProb=="P(x<=a)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x<=a, x, 0)), fill = "red") +
+                        xlim(30, 80) + ggtitle("Ilustrarea probabilitatii")
+                }else if(SelectProb=="P(x>=b)"){
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=b, x, 0)), fill = "red") +
+                        xlim(30, 80) + ggtitle("Ilustrarea probabilitatii")
+                }else{
+                    ggplot(data = dat, mapping = aes(x = x, y = y)) +
+                        geom_line()+
+                        geom_area(mapping = aes(x = ifelse(x>=a & x<=b, x, 0)), fill = "red") +
+                        xlim(30, 80) + ggtitle("Ilustrarea probabilitatii")
+                }
+            
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P11(a))
+                    
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P11(b, param = 1))
+                }else{
+                        c("Probability: ", P11(a, b))
+                } 
+  
+```
+
+### Ex 12 (Repartitie uniforma pentru v.a. discreta)
+Avem cu bile numerotate de la 1 la *interv*. Punem in urna bilele din [*aa,bb*] si ne interesam la probabilitatea de a le alege.
+
+```{r ex12}
+
+            # 12 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            aa = 20
+            bb = 25
+            a = 10
+            b = 22
+            interv = 30
+            SelectProb="P(x>=b)"
+            fm = function(x){
+                if(x>=aa && x<=bb)
+                    return(1/(bb-aa+1))
+                else 
+                    return (0)
+            }
+            F = function(x){
+                if(x>=aa && x<bb)
+                    return((1-aa+floor(x))/(bb-aa+1))
+                else if(x==bb)
+                    return (1)
+                else 
+                    return (0)
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, interv, by=1)
+                y=fm(0)
+                for(i in 1:interv){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, ylim = c(0,1), main="Functie de masa")
+                segments(x, 0, x, y, col="red")
+            # fct rept
+                x = seq(-1, interv, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red", ylim = c(0,1), main="Functie de repartitie")
+              
+                x = seq(0, interv, by=1)
+                y=fm(0)
+                for(i in 1:interv){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, ylim = c(0,1), main="Ilustrarea probabilitatii")
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(0)
+                    for(i in 1:interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(aa, a)
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, interv, by=1)
+                    y=fm(0)
+                    for(i in 1:interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(b, bb)
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b, by=1)
+                    y=fm(0)
+                    for(i in 1:interv){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    x = seq(a, b)
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex13
+
+Care e probabilitatea sa selectam x (ex13_x) bile rosii dintr-o multime cu k (ex13_k) extrase dintr-o urna care contine m (ex13_m) bile rosii si n (ex13_n) bile verzi? 
+
+```{r ex13}
+       
+            ex13_x = 14
+            ex13_m = 70
+            ex13_n = 84
+            ex13_k = 20
+            a = 9
+           
+            fd13 = function(x)
+            {
+                return(dhyper(x = x, m = ex13_m, n = ex13_n, k = ex13_k))
+            }
+            
+            F13 = function(xx)
+            {
+                return (phyper(q = xx, m = ex13_m, n = ex13_n, k = ex13_k, lower.tail = TRUE))
+            }
+            
+            fctMasa <- ({
+                x = seq(1:ex13_k)
+                density <- fd13(x)
+                plot (x = x,y=density,type="l", main="Functie de densitate")
+            })
+            
+            fctRep <- ({
+                x = seq(1:ex13_k)
+                prob <- F13(x)
+                plot (x = x,y=prob,type="l", main="Functie de repartitie")
+            })
+            
+            fctProb <-({
+                x = seq(1:ex13_k)
+                y = fd13(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii") # , ylim = c(0,1))
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(lim_inf,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],lim_sup), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(a , b)
+                    y = fd13(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P13 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F13(a))
+                    }
+                    else
+                    {
+                        return (1 - F13 (a))
+                    }
+                }
+                else
+                {
+                    return (F13(b) - F13(a))
+                }
+            }
+            
+            SelectProb = "P(x<=a)"
+            
+            if(SelectProb=="P(x<=a)"){
+                c("Probability: ", P13(a))
+            }else if(SelectProb=="P(x>=b)"){
+                c("Probability: ", P13(b, param = 1))
+            }else{
+                c("Probability: ", P13(a, b))
+            }
+```
+
+
+### Ex 14
+Fiind dat pretul pe noapte al unor apartamente dintr-un oras, se calculeaza probabilitatea ca pretul unei camere sa fie intr-un anumit interval.
+```{r ex14, warning=FALSE}
+            library(ggplot2)
+            library(dplyr)
+            b = 80
+            data <- read.table("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/1_OneNum.csv", header=TRUE)
+            
+            dat <- with(density(data$price), data.frame(x, y))
+            
+            f14 = function(datt){
+                return(datt)
+            }
+                data %>%
+                    filter( price<300) %>%
+                    ggplot( aes(x=price)) +
+                    geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8) + ggtitle("Functie de densitate")
+                
+                ggplot(dat, aes(x=x)) + stat_ecdf(geom = "line") + ggtitle("Functie de repartitie")
+            
+                dat <- with(density(data$price), data.frame(x, y))
+                SelectProb = "P(x>=b)"
+                if(SelectProb=="P(x<=a)"){
+                    data %>%
+                        filter( price<=a) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8) + ggtitle("Ilustrarea probabilitatii")
+                }else if(SelectProb=="P(x>=b)"){
+                    data %>%
+                        filter( price>=b & price < 600) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8) + ggtitle("Ilustrarea probabilitatii")
+                }else{
+                    data %>%
+                        filter( price>=a & price <= b) %>%
+                        ggplot( aes(x=price)) +
+                        geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8) + ggtitle("Ilustrarea probabilitatii")
+                }
+            
+            F14 = function(xx){
+                return(pnorm(q=xx, mean = 90, sd = 50))
+            }
+            P14 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F14(a))
+                    }
+                    else
+                    {
+                        return (1 - F14 (a))
+                    }
+                }
+                else
+                {
+                    return (F14(b) - F14(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P14(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P14(b, param = 1))
+                }else{
+                        c("Probability: ", P14(a, b))
+                }
+            
+```
+
+
+### Ex 15 (Repartitie geometrica pentru v.a. discreta)
+Aruncam in mod repetat cu o moneda cu probabilitatea *pr* de a obtine cap. Fie *k* numarul de aruncari. Astfel, *X* va reprezenta numarul de aruncari pana obtinem primul succes 
+```{r ex15}
+
+            # 15 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            a = 3
+            b = 6
+            pr = 0.2
+            k = 10
+            SelectProb="P(a<=x<=b)"
+            fm = function(x){
+                return(dgeom(x, prob = pr))
+            }
+            F = function(x){
+                return(pgeom(x, prob = pr))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, k, by=1)
+                y=fm(0)
+                for(i in 1:k){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Functie de masa")
+                segments(x, 0, x, y, col="red")
+            # fct rep
+                x = seq(-1, k, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red", main="Functie de repartitie")
+                
+                x = seq(0, k, by=1)
+                y=fm(0)
+                for(i in 1:k){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Ilustrarea probabilitatii")
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, k, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+            
+```
+
+### Ex 16 (Repartitie poisson pentru v.a. discreta)
+Numarul de masini intr-o intersectie intr-o zi este *lmb*. Ne interesam la probabilitatea de a avea *k2* masini intr-o alta zi
+```{r ex16}
+
+            # 16 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            a = 4
+            b = 7
+            lmb = 10
+            k2 = 25
+            
+            SelectProb="P(x>=b)"
+            fm = function(x){
+                return(dpois(x, lambda = lmb))
+            }
+            F = function(x){
+                return(ppois(x, lambda = lmb))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, k2, by=1)
+                y=fm(0)
+                for(i in 1:k2){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Functie de masa")
+                segments(x, 0, x, y, col="red")
+                
+            # fct rep
+                x = seq(-1, k2, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red", main="Functie de repartitie")
+                
+                x = seq(0, k2, by=1)
+                y=fm(0)
+                for(i in 1:k2){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Ilustrarea probabilitatii")
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, k2, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex 17 (Repartitie negativ binomiala pentru v.a. discreta)
+Modelam numarul de aruncari ale unei monede cu probabilitate *pr2* pana obtinem pentru prima oara *r* succese.
+```{r ex17}
+
+            # 17 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # 
+            a = 12
+            b = 16
+            pr2 = 0.2
+            k3 = 20
+            r = 5
+            
+            SelectProb="P(x<=a)"
+            fm = function(x){
+                if(x>=r)
+                    return(factorial(x-1)/(factorial(r-1)*factorial(x-r))*(1-pr2)^(x-r)*pr2^r)
+                else
+                    return (0)
+            }
+            F = function(x){
+                if(x>=r)
+                    return (fm(x)+F(x-1))
+                else return (0)
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, k3, by=1)
+                y=fm(0)
+                for(i in 1:k3){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Functie de masa")
+                segments(x, 0, x, y, col="red")
+            # fct rep
+                x = seq(-1, k3, length.out = 1000)
+                y = F(x)
+                plot(x, y, type= "l", col="red", ylim = c(0,1), main="Functie de repartitie")
+                
+                x = seq(0, k3, by=1)
+                y=fm(0)
+                for(i in 1:k3){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Ilustrarea probabilitatii")
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(0)
+                    for(i in 1:a){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(r, a)
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, k3, by=1)
+                    y=fm(b)
+                    for(i in (b+1):k3){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(b, k3)
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b, by=1)
+                    y=fm(a)
+                    for(i in (a+1):b){
+                        y = c(y,fm(i))
+                    }
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    #x = seq(a, b)
+                    segments(x, 0, x, y, col="blue")
+                }
+                
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+```
+
+### Ex 18
+Aplicatie a repartitiei log-normale ce calculeaza probabilitatea in functie de medie si deviatia standard
+```{r ex18}
+            meanlog = 1
+            sdlog = 0.25
+            f18 = function(x){
+                return(dlnorm(x=x, meanlog = meanlog, sdlog = sdlog, log = FALSE))
+            }
+            
+            F18 = function(xx){
+                return(plnorm(q=xx, meanlog = meanlog, sdlog = sdlog, log = FALSE))
+            }
+            
+            x = seq(0:15)
+            density <- f18(x)
+            plot (x = x,y=density,type="l", main="Functie de densitate")
+            
+            x = seq(0:15)
+            prob <- F18(x)
+            plot (x = x,y=prob,type="l", main="Functie de repartitie")
+            
+            x = seq(0:15)
+            y = f18(x)
+            mini = min(y)
+            plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii") # , ylim = c(0,1))
+            SelectProb = "caz3"
+            if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(lim_inf,x[i],a), c(0,y[i],0), col="light blue")
+            }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],lim_sup), c(0,y[i],0), col="light blue")
+            }else{
+                    x = seq(a , b)
+                    y = f18(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            
+            P18 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F18(a))
+                    }
+                    else
+                    {
+                        return (1 - F18 (a))
+                    }
+                }
+                else
+                {
+                    return (F18(b) - F18(a))
+                }
+            }
+            
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P18(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P18(b, param = 1))
+                }else{
+                        c("Probability: ", P18(a, b))
+                }
+                  
+```
+
+### Ex 19 (aproximarea binomiala prin Poisson)
+Ilustram aproximarea binomiala prin Poisson data de numarul *n* si probabilitatea *p*
+```{r ex19}
+            # 19 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # Aproximarea binomiala prin Poisson
+            a = 8
+            b = 12
+            n = 40
+            pr3 = 0.33
+            
+            SelectProb="P(a<=x<=b)"
+            fm = function(x){
+                return(dpois(x, lambda = lmb))
+            }
+            lmbd = n*pr3
+            fm = function(x){
+                return(dpois(x, lambda = lmbd))
+            }
+            F = function(x){
+                return(ppois(x, lambda = lmbd))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            # fct masa
+                x = seq(0, n, by=1)
+                y=fm(0)
+                for(i in 1:n){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Functie de masa")
+                segments(x, 0, x, y, col="red")
+            # fct rep
+                x = seq(-1, n, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red", main="Functie de repartitie")
+            
+                x = seq(0, n, by=1)
+                y=fm(0)
+                for(i in 1:n){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5, main="Ilustrarea probabilitatii")
+                #segments(x, 0, x, y, col="red")
+                if(SelectProb=="P(x<=a)"){
+                    x = seq(0, a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    x = seq(b, n, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else{
+                    x = seq(a, b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P(b, param = 1)+fm(b))
+                }else{
+                        c("Probability: ", P(a, b)+fm(a))
+                }
+            
+
+```
+
+### Ex 20
+In medie, o persoana trimite un mandat postal o data la un numar theta de minute. Care este probabilitatea ca acea persoana sa trimita un numar alpha de mandate postale intr-o anumita perioada de timp?
+```{r}
+      alpha = 10
+      theta = 15
+      
+            f20 = function(x){
+                return(dgamma(x = x, shape = alpha, scale = theta))
+            }
+            F20 = function(xx){
+                return(pgamma(q = xx, shape = alpha, scale = theta))
+            }
+            
+                x = seq(0:700)
+                density <- f20(x)
+                plot (x = x,y=density,type="l", main="Functie de densitate")
+            
+                x = seq(0:700)
+                prob <- F20(x)
+                plot (x = x,y=prob,type="l", main="Functie de repartitie")
+            
+                x = seq(0:700)
+                y = f20(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii") 
+                SelectProb = "P(x>=b)"
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(0,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(a , b)
+                    y = f20(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+            
+            P20 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F20(a))
+                    }
+                    else
+                    {
+                        return (1 - F20(a))
+                    }
+                }
+                else
+                {
+                    return (F20(b) - F20(a))
+                }
+            }
+            
+                if(SelectProb=="P(x<=a)"){
+                        c("Probability: ", P20(a))
+                }else if(SelectProb=="P(x>=b)"){
+                        c("Probability: ", P20(b, param = 1))
+                }else{
+                        c("Probability: ", P20(a, b))
+                }
+        
+```
+
+### Ex 21
+Luand în considerare un experiment cu probabilitatea de succes a testelor p (ex21_p) și n (ex21_n), adică X∼Bin (13,0.7)
+
+```{r}
+            # 21
+            ex21_n = 13
+            ex21_p = 0.7
+            a = 8
+            b = 11
+    
+            f21 = function(x){
+                return(dbinom(x, size = ex21_n, prob = ex21_p))
+            }
+            
+            F21 = function(xx){
+                return(pbinom(xx, size = ex21_n, prob = ex21_p))
+            }
+            
+            fctMasa <- ({
+                x = 0:ex21_n
+                density <- f21(x)
+                plot (x = x,y=density,type="l", main="Functie de densitate")
+            })
+            
+            fctRep <- ({
+                x = 0:ex21_n
+                prob <- F21(x)
+                plot (x = x,y=prob,type="l", main="Functie de repartitie")
+            })
+            
+            SelectProb = "P(a<=x<=b)"
+            
+            fctProb <-({
+                x = 0:ex21_n
+                y = f21(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red", main="Ilustrarea probabilitatii") 
+                
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(0,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(a , b)
+                    y = f21(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+                
+            })
+            
+            
+            P21 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F21(a))
+                    }
+                    else
+                    {
+                        return (1 - F21 (a))
+                    }
+                }
+                else
+                {
+                    return (F21(b) - F21(a))
+                }
+            }
+            
+            
+              
+            if(SelectProb=="P(x<=a)"){
+                  c("Probability: ", P21(a))
+            }else if(SelectProb=="P(x>=b)"){
+                  c("Probability: ", P21(b, param = 1))
+            }else{
+                  c("Probability: ", P21(a, b))
+            }
+     
+        
+```
+
