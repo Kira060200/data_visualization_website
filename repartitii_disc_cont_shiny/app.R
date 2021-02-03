@@ -1774,12 +1774,12 @@ server <- function(input, output, session) {
                 updateSliderInput(session = session, "a", min=0, max = input$n)
                 updateSliderInput(session = session, "b", min=0, max = input$n)
             })
-            lmb = input$n*input$pr3
+            lmbd = input$n*input$pr3
             fm = function(x){
-                return(dpois(x, lambda = input$lmb))
+                return(dpois(x, lambda = lmbd))
             }
             F = function(x){
-                return(ppois(x, lambda = input$lmb))
+                return(ppois(x, lambda = lmbd))
             }
             F = Vectorize(F, vectorize.args = "x")
             output$fctMasa <- renderPlot({

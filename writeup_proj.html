@@ -971,12 +971,12 @@ if(SelectProb==&quot;P(x&lt;=a)&quot;){
             fm = function(x){
                 return(dpois(x, lambda = lmb))
             }
-            lmb = n*pr3
+            lmbd = n*pr3
             fm = function(x){
-                return(dpois(x, lambda = lmb))
+                return(dpois(x, lambda = lmbd))
             }
             F = function(x){
-                return(ppois(x, lambda = lmb))
+                return(ppois(x, lambda = lmbd))
             }
             F = Vectorize(F, vectorize.args = &quot;x&quot;)
             # fct masa
