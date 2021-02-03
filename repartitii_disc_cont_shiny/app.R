@@ -18,12 +18,13 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
     
     selectInput("SelectProb", "Select probability formula", choices = c("P(x<=a)", "P(x>=b)", "P(a<=x<=b)")),
     sliderInput("a",
-        "a:",
-        step = 1,
-        min = 0,
-        max = 1,
-        value = 0),
+                "a:",
+                step = 1,
+                min = 0,
+                max = 1,
+                value = 0),
     sliderInput("b",
+<<<<<<< Updated upstream
         "b:",
         step = 1,
         min = 0,
@@ -227,11 +228,252 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
         plotOutput("fctProb"),
         textOutput("valueProb")
     )
+=======
+                "b:",
+                step = 1,
+                min = 0,
+                max = 1,
+                value = 1)
+),
+mainPanel(tabsetPanel(id = "tabs",
+                      tabPanel("1",
+                               sliderInput("prob",
+                                           "Probabilitate:",
+                                           min = 0.1,
+                                           max = 1,
+                                           value = 0.33)
+                      ),
+                      tabPanel("2"),
+                      tabPanel("3",
+                               numericInput("lmb3",
+                                           "Lambda:",
+                                           min = 0,
+                                           value = 1)
+                      ),
+                      tabPanel("4",
+                               sliderInput("prob2",
+                                           "Probability:",
+                                           min = 0.1,
+                                           max = 1,
+                                           value = 0.33),
+                               numericInput("NrAruncari",
+                                            "Numar aruncari",
+                                            min = 1,
+                                            max = 1000,
+                                            value = 300)
+                      ),
+                      tabPanel("5",
+                               sliderInput("prob_infectare",
+                                           "Probability:",
+                                           min = 0.01,
+                                           max = 1,
+                                           value = 0.001),
+                               numericInput("NrInfectati",
+                                            "Numar infectati",
+                                            min = 10,
+                                            max = 5000,
+                                            value = 1000)
+                      ),
+                      tabPanel("6",
+                               sliderInput("ProbBit",
+                                           "Probabilitate:",
+                                           min = 0.1,
+                                           max = 1,
+                                           value = 0.1),
+                               numericInput("NrIncercari",
+                                            "Numar incercari",
+                                            min = 1,
+                                            max = 1000,
+                                            value = 15),
+                               numericInput("NrBiti",
+                                            "Numar biti",
+                                            min = 1,
+                                            value = 10)
+                      ),tabPanel("7",
+                                 sliderInput("Mean",
+                                             "Mean:",
+                                             min = 90,
+                                             max = 110,
+                                             value = 100),
+                                 sliderInput("StDev",
+                                             "Standard Deviation",
+                                             min = 10,
+                                             max = 20,
+                                             value = 15)
+                      ),
+                      tabPanel("8",
+                               sliderInput("exp_sales",
+                                           "Expected Sales:",
+                                           min =1,
+                                           max = 10,
+                                           value = 3),
+                               numericInput("events",
+                                            "NO sales",
+                                            min = 1,
+                                            max = 100,
+                                            value = 10)
+                      ),
+                      tabPanel("9",
+                               sliderInput("Time",
+                                           "Average time spent per visit:",
+                                           min = 0,
+                                           max = 20,
+                                           value = 5)
+                      ),
+                      tabPanel("10",
+                               sliderInput("nr_test",
+                                           "Number of tests",
+                                           min = 1,
+                                           max = 100,
+                                           value = 10),
+                               sliderInput("lim_inf",
+                                           "Limita inferioara:",
+                                           min = 1,
+                                           max = 100,
+                                           value = 1),
+                               sliderInput("lim_sup",
+                                           "Limita superioara:",
+                                           min = 1,
+                                           max = 100,
+                                           value = 3)
+                      ),
+                      tabPanel("11"),
+                      tabPanel("12",
+                               sliderInput("interv",
+                                           "Lungime interval:",
+                                           min = 0,
+                                           max = 100,
+                                           value = 20),
+                               sliderInput("aa",
+                                           "Limita inferioara:",
+                                           min = 0,
+                                           max = 100,
+                                           value = 20),
+                               sliderInput("bb",
+                                           "Limita superioara:",
+                                           min = 0,
+                                           max = 100,
+                                           value = 20)
+                      ),
+                      tabPanel("13",
+                               sliderInput("ex13_x",
+                                           "X:",
+                                           min = 1,
+                                           max = 100,
+                                           value = 14),
+                               sliderInput("ex13_m",
+                                           "M:",
+                                           min = 1,
+                                           max = 100,
+                                           value = 70),
+                               sliderInput("ex13_n",
+                                           "N:",
+                                           min = 1,
+                                           max = 100,
+                                           value = 30),
+                               sliderInput("ex13_k",
+                                           "K:",
+                                           min = 1,
+                                           max = 100,
+                                           value = 20)
+                      ),
+                      tabPanel("14"),
+                      tabPanel("15",
+                               sliderInput("pr",
+                                           "Probabilitate:",
+                                           min = 0,
+                                           max = 1,
+                                           value = 0.2),
+                               numericInput("k",
+                                            "k:",
+                                            min = 0,
+                                            value = 10)
+                      ),
+                      tabPanel("16",
+                               numericInput("lmb",
+                                            "Lambda:",
+                                            min = 0,
+                                            value = 10),
+                               numericInput("k2",
+                                            "k:",
+                                            min = 0,
+                                            value = 25)
+                      ),
+                      tabPanel("17",
+                               numericInput("pr2",
+                                            "Probabilitate:",
+                                            min = 0,
+                                            max = 1,
+                                            value = 0.2),
+                               numericInput("k3",
+                                            "k:",
+                                            min = 1,
+                                            value = 10),
+                               numericInput("r",
+                                            "r:",
+                                            min = 1,
+                                            value = 5)
+                      ),
+                      tabPanel("18",
+                               numericInput("meanlog",
+                                            "Mean on the log scale:",
+                                            min = 0,
+                                            max = 1,
+                                            value = 1),
+                               numericInput("sdlog",
+                                            "Standard Deviation on the log scale:",
+                                            min = 0,
+                                            max = 1,
+                                            value = 0.25)
+                      ),
+                      tabPanel("19",
+                               numericInput("n",
+                                            "n:",
+                                            min = 0,
+                                            value = 10),
+                               numericInput("pr3",
+                                            "probabilitate:",
+                                            min = 0,
+                                            value = 0.33)
+                      ),
+                      tabPanel("20",
+                               sliderInput("alpha",
+                                           "Number of money orders",
+                                           min = 1,
+                                           max = 10,
+                                           value = 10),
+                               sliderInput("theta",
+                                           "On average, someone sends a money order once per y minutes:",
+                                           min = 10,
+                                           max = 60,
+                                           value = 15)
+                      ),
+                      tabPanel("21",
+                               numericInput("ex21_n",
+                                            "N:",
+                                            min = 0,
+                                            max = 20,
+                                            value = 13),
+                               numericInput("ex21_p",
+                                            "P:",
+                                            min = 0,
+                                            max = 1,
+                                            value = 0.7)
+                      )
+                      
+                      
+),
+plotOutput("fctMasa"),
+plotOutput("fctRep"),
+plotOutput("fctProb"),
+textOutput("valueProb")
+>>>>>>> Stashed changes
 )
-    
-    #navbarPage("Navbar!",
-    #),
-    
+)
+
+#navbarPage("Navbar!",
+#),
+
 )
 
 # Define server logic required to draw a histogram
@@ -453,10 +695,10 @@ server <- function(input, output, session) {
         else if (input$tabs==3){
             # 3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # x>0
-                             updateSliderInput(session = session, "a", min = 0.01, max = 50)
-                             updateSliderInput(session = session, "b", min = 0.01, max = 50)
+            updateSliderInput(session = session, "a", min = 0.01, max = 50)
+            updateSliderInput(session = session, "b", min = 0.01, max = 50)
             fd3 = function(x){
-                    return (input$lmb3*exp(-input$lmb3*x))
+                return (input$lmb3*exp(-input$lmb3*x))
             }
             F3 = function(x){
                 return (integrate(fd3,lower = 0, upper = x)$value)
@@ -723,7 +965,7 @@ server <- function(input, output, session) {
             observeEvent(input$b,  {
                 updateSliderInput(session = session, "a", max = input$b)
             })
-            }else if (input$tabs==6){
+        }else if (input$tabs==6){
             # 6 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # Fie un bit care este transmis oe un canal bruiat si are prob p sa fie transmis incorect.
             # Pt a imbunatati fiabilitatea comunicarii, este transmis de n ori, unde n impar
@@ -830,22 +1072,35 @@ server <- function(input, output, session) {
             observeEvent(input$b,  {
                 updateSliderInput(session = session, "a", max = input$b)
             })
-            }else if(input$tabs == 7){
-                updateSliderInput(session = session, "a", min = 50, max = 140, value = 80)
-                updateSliderInput(session = session, "b", min = 50, max = 140, value = 120)
-                fd7 = function(x){
-                    return (dnorm(x, input$Mean, input$StDev))
-                }
-                F7 = function(x){
-                    # return (integrate(fd7,lower = -Inf, upper = x)$value)
-                    return (pnorm(x, input$Mean, input$StDev))
-                }
-                F7 = Vectorize(F7, vectorize.args = "x")
-                x <- seq(-4, 4, length.out=100)*input$StDev + input$Mean
-                output$fctMasa <- renderPlot({
-                    hx <- dnorm(x, input$Mean, input$StDev)
-                    plot(x, hx, type = "n", xlab = "IQ Values", ylab = "")
+        }else if(input$tabs == 7){
+            updateSliderInput(session = session, "a", min = 50, max = 140, value = 80)
+            updateSliderInput(session = session, "b", min = 50, max = 140, value = 120)
+            fd7 = function(x){
+                return (dnorm(x, input$Mean, input$StDev))
+            }
+            F7 = function(x){
+                # return (integrate(fd7,lower = -Inf, upper = x)$value)
+                return (pnorm(x, input$Mean, input$StDev))
+            }
+            F7 = Vectorize(F7, vectorize.args = "x")
+            x <- seq(-4, 4, length.out=100)*input$StDev + input$Mean
+            output$fctMasa <- renderPlot({
+                hx <- dnorm(x, input$Mean, input$StDev)
+                plot(x, hx, type = "n", xlab = "IQ Values", ylab = "")
+                lines(x, hx)
+            }) 
+            output$fctRep <- renderPlot({
+                x = seq(-10, 10, length.out = 1000)
+                y = F7(x)
+                plot(x, y, type= "l", col="red")
+            })
+            output$fctProb <- renderPlot({
+                hx <- dnorm(x, input$Mean, input$StDev)
+                plot(x, hx, type = "n", xlab = "IQ Values", ylab = "")
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
                     lines(x, hx)
+<<<<<<< Updated upstream
                 }) 
                 output$fctRep <- renderPlot({
                     x = seq(-10, 10, length.out = 1000)
@@ -878,6 +1133,44 @@ server <- function(input, output, session) {
                 observeEvent(input$b,  {
                     updateSliderInput(session = session, "a", max = input$b)
                 })
+=======
+                    polygon(c(input$a,x[i]), c(0,hx[i]), col="red")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    lines(x, hx)
+                    polygon(c(input$b,x[i]), c(0,hx[i]), col="red")
+                }else{
+                    i <- x >= input$a & x <= input$b
+                    lines(x, hx)
+                    polygon(c(input$a,x[i],input$b), c(0,hx[i],0), col="red")
+                    
+                }
+            })
+            observeEvent(input$a,  {
+                updateSliderInput(session = session, "b", min = input$a)
+            })
+            
+            
+            observeEvent(input$b,  {
+                updateSliderInput(session = session, "a", max = input$b)
+            })
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", pnorm(input$a, input$Mean, input$StDev))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", 1- pnorm(input$b, input$Mean, input$StDev))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", pnorm(input$b, input$Mean, input$StDev) - pnorm(input$a, input$Mean, input$StDev))
+                    })
+                }
+            })
+>>>>>>> Stashed changes
         }else if (input$tabs == 8){
             
             # What is the probability of making 2 to 4 sales in a week if the average sales rate is 3 per week?
@@ -1765,7 +2058,131 @@ server <- function(input, output, session) {
                 updateSliderInput(session = session, "a", max = input$b)
             })
             
+<<<<<<< Updated upstream
         }else if(input$tabs == 19){
+            # 19 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # Aproximarea binomiala prin Poisson
+            updateSliderInput(session = session, "a", min=0, max = input$n)
+            updateSliderInput(session = session, "b", min=0, max = input$n)
+            observeEvent(input$n,  {
+                updateSliderInput(session = session, "a", min=0, max = input$n)
+                updateSliderInput(session = session, "b", min=0, max = input$n)
+            })
+            lmbd = input$n*input$pr3
+            fm = function(x){
+                return(dpois(x, lambda = lmbd))
+=======
+        }else if(input$tabs == 18){
+            
+            updateSliderInput(session = session, "a", min=0, max = 5)
+            updateSliderInput(session = session, "b", min=0, max = 5)
+            
+            f18 = function(x){
+                return(dlnorm(x=x, meanlog = input$meanlog, sdlog = input$sdlog, log = FALSE))
+>>>>>>> Stashed changes
+            }
+            F = function(x){
+                return(ppois(x, lambda = lmbd))
+            }
+            F = Vectorize(F, vectorize.args = "x")
+            output$fctMasa <- renderPlot({
+                x = seq(0, input$n, by=1)
+                y=fm(0)
+                for(i in 1:input$n){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                segments(x, 0, x, y, col="red")
+            })
+            output$fctRep <- renderPlot({
+                x = seq(-1, input$n, length.out = 1000)
+                y = F(x)
+                #y=F(0)
+                #for(i in 1:50){
+                #    y = c(y,F(i))
+                #}
+                #print(y)
+                plot(x, y, type= "l", col="red")
+            })
+            output$fctProb <- renderPlot({
+                x = seq(0, input$n, by=1)
+                y=fm(0)
+                for(i in 1:input$n){
+                    y = c(y,fm(i))
+                }
+                plot(x, y, lwd=5)
+                #segments(x, 0, x, y, col="red")
+                if(input$SelectProb=="P(x<=a)"){
+<<<<<<< Updated upstream
+                    x = seq(0, input$a, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    x = seq(input$b, input$n, by=1)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+=======
+                    i <- x <= input$a
+                    polygon(c(0,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],max(x)), c(0,y[i],0), col="light blue")
+>>>>>>> Stashed changes
+                }else{
+                    x = seq(input$a, input$b)
+                    y=fm(x)
+                    #plot(x, y, lwd=5, ylim = c(0,1))
+                    segments(x, 0, x, y, col="blue")
+                }
+            })
+            P = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F(a))
+                    }
+                    else
+                    {
+                        return (1 - F(a))
+                    }
+                }
+                else
+                {
+                    return (F(b) - F(a))
+                }
+            }
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$b, param = 1)+fm(input$b))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P(input$a, input$b)+fm(input$a))
+                    })
+                }
+            })
+            observeEvent(input$a,  {
+                updateSliderInput(session = session, "b", min = input$a)
+            })
+            
+            
+            observeEvent(input$b,  {
+                updateSliderInput(session = session, "a", max = input$b)
+            })
+            
+        }
+<<<<<<< Updated upstream
+=======
+        else if(input$tabs == 19){
             # 19 G~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # Aproximarea binomiala prin Poisson
             updateSliderInput(session = session, "a", min=0, max = input$n)
@@ -1869,6 +2286,169 @@ server <- function(input, output, session) {
             })
             
         }
+        else if(input$tabs == 20){
+            updateSliderInput(session = session, "a", min=0, max = 150)
+            updateSliderInput(session = session, "b", min=100, max = 300)
+            
+            
+            
+            f20 = function(x){
+                return(dgamma(x = x, shape = input$alpha, scale = input$theta))
+            }
+            F20 = function(xx){
+                return(pgamma(q = xx, shape = input$alpha, scale = input$theta))
+            }
+            
+            output$fctMasa <- renderPlot({
+                x = seq(0:700)
+                density <- f20(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x = seq(0:700)
+                prob <- F20(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            output$fctProb <-renderPlot({
+                x = seq(0:700)
+                y = f20(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") # , ylim = c(0,1))
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
+                    polygon(c(0,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(input$a , input$b)
+                    y = f20(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+            })
+            
+            P20 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F20(a))
+                    }
+                    else
+                    {
+                        return (1 - F20(a))
+                    }
+                }
+                else
+                {
+                    return (F20(b) - F20(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P20(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P20(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P20(input$a, input$b))
+                    })
+                }
+            })    
+        }else if (input$tabs == 21)
+        {
+            # Consider an experiment with probability of success of p (ex21_p) and n (ex21_n) trials, i.e. X???Bin(13,0.7).
+            
+            observeEvent(input$ex21_n,  {
+                updateSliderInput(session = session, "a", max = input$ex21_n)
+                updateSliderInput(session = session, "b", max = input$ex21_n)
+            })
+            
+            f21 = function(x){
+                return(dbinom(x, size = input$ex21_n, prob = input$ex21_p))
+            }
+            
+            F21 = function(xx){
+                return(pbinom(xx, size = input$ex21_n, prob = input$ex21_p))
+            }
+            
+            output$fctMasa <- renderPlot({
+                x = 0:input$ex21_n
+                density <- f21(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x = 0:input$ex21_n
+                prob <- F21(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            output$fctProb <-renderPlot({
+                x = 0:input$ex21_n
+                y = f21(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") 
+                
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
+                    polygon(c(0,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(input$a , input$b)
+                    y = f21(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+                
+            })
+            
+            
+            P21 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F21(a))
+                    }
+                    else
+                    {
+                        return (1 - F21 (a))
+                    }
+                }
+                else
+                {
+                    return (F21(b) - F21(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P21(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P21(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P21(input$a, input$b))
+                    })
+                }
+            })   
+        }
+>>>>>>> Stashed changes
         
     })    
 }
