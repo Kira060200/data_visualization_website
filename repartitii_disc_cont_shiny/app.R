@@ -221,7 +221,19 @@ ui <- fluidPage(sidebarLayout( sidebarPanel(
                                      min = 0,
                                      max = 1,
                                      value = 0.25)
-                        )
+                        ),
+               tabPanel("21",
+                        numericInput("ex21_n",
+                                     "N:",
+                                     min = 0,
+                                     max = 20,
+                                     value = 13),
+                        numericInput("ex21_p",
+                                     "P:",
+                                     min = 0,
+                                     max = 1,
+                                     value = 0.7)
+               )
                
                
         ),
@@ -1895,6 +1907,90 @@ server <- function(input, output, session) {
                     })
                 }
             })           
+        }else if (input$tabs == 21)
+        {
+            # Consider an experiment with probability of success of p (ex21_p) and n (ex21_n) trials, i.e. X???Bin(13,0.7).
+            
+            observeEvent(input$ex21_n,  {
+                updateSliderInput(session = session, "a", max = input$ex21_n)
+                updateSliderInput(session = session, "b", max = input$ex21_n)
+            })
+            
+            f21 = function(x){
+                return(dbinom(x, size = input$ex21_n, prob = input$ex21_p))
+            }
+            
+            F21 = function(xx){
+                return(pbinom(xx, size = input$ex21_n, prob = input$ex21_p))
+            }
+            
+            output$fctMasa <- renderPlot({
+                x = 0:input$ex21_n
+                density <- f21(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            output$fctRep <- renderPlot({
+                x = 0:input$ex21_n
+                prob <- F21(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            output$fctProb <-renderPlot({
+                x = 0:input$ex21_n
+                y = f21(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") 
+                
+                if(input$SelectProb=="P(x<=a)"){
+                    i <- x <= input$a
+                    polygon(c(0,x[i],input$a), c(0,y[i],0), col="light blue")
+                }else if(input$SelectProb=="P(x>=b)"){
+                    i <- x >= input$b
+                    polygon(c(input$b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(input$a , input$b)
+                    y = f21(x)
+                    polygon(c(input$a,x,input$b), c(0,y,0), col="light blue")
+                }
+                
+            })
+            
+            
+            P21 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F21(a))
+                    }
+                    else
+                    {
+                        return (1 - F21 (a))
+                    }
+                }
+                else
+                {
+                    return (F21(b) - F21(a))
+                }
+            }
+            
+            observeEvent(input$SelectProb, {
+                if(input$SelectProb=="P(x<=a)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P21(input$a))
+                    })
+                }else if(input$SelectProb=="P(x>=b)"){
+                    output$valueProb <- renderText({
+                        c("Probability: ", P21(input$b, param = 1))
+                    })
+                }else{
+                    output$valueProb <- renderText({
+                        c("Probability: ", P21(input$a, input$b))
+                    })
+                }
+            })   
         }
     })    
 }

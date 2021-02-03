@@ -559,3 +559,91 @@ Care e probabilitatea sa selectam x (ex13_x) bile rosii dintr-o multime cu k (ex
 
 ```
 
+###
+Consider an experiment with probability of success of p (ex21_p) and n (ex21_n) trials, i.e. X∼Bin(13,0.7).
+
+```{r}
+            # 21
+
+            ex21_n = 13
+            ex21_p = 0.7
+            a = 8
+            b = 11
+    
+            f21 = function(x){
+                return(dbinom(x, size = ex21_n, prob = ex21_p))
+            }
+            
+            F21 = function(xx){
+                return(pbinom(xx, size = ex21_n, prob = ex21_p))
+            }
+            
+            fctMasa <- ({
+                x = 0:ex21_n
+                density <- f21(x)
+                plot (x = x,y=density,type="l")
+            })
+            
+            fctRep <- ({
+                x = 0:ex21_n
+                prob <- F21(x)
+                plot (x = x,y=prob,type="l")
+            })
+            
+            SelectProb = "P(a<=x<=b)"
+            
+            fctProb <-({
+                x = 0:ex21_n
+                y = f21(x)
+                mini = min(y)
+                plot(x, y, type= "l", col="red") 
+                
+                if(SelectProb=="P(x<=a)"){
+                    i <- x <= a
+                    polygon(c(0,x[i],a), c(0,y[i],0), col="light blue")
+                }else if(SelectProb=="P(x>=b)"){
+                    i <- x >= b
+                    polygon(c(b,x[i],max(x)), c(0,y[i],0), col="light blue")
+                }else{
+                    x = seq(a , b)
+                    y = f21(x)
+                    polygon(c(a,x,b), c(0,y,0), col="light blue")
+                }
+                
+            })
+            
+            
+            P21 = function(a, b=NULL, param=NULL)
+            {
+                if(is.null(b))
+                {
+                    if(is.null(param))
+                    {
+                        return(F21(a))
+                    }
+                    else
+                    {
+                        return (1 - F21 (a))
+                    }
+                }
+                else
+                {
+                    return (F21(b) - F21(a))
+                }
+            }
+            
+            
+              
+            if(SelectProb=="P(x<=a)"){
+                  c("Probability: ", P21(a))
+            }else if(SelectProb=="P(x>=b)"){
+                  c("Probability: ", P21(b, param = 1))
+            }else{
+                  c("Probability: ", P21(a, b))
+            }
+     
+        
+
+```
+
+
